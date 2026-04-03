@@ -28,7 +28,7 @@
             <p th:text="'Opis: ' + ${plan.description}">Opis</p>
         </div>
 
-        <div style="background: #f8f9fa; padding: 15px; border: 1px dashed #ccc; border-radius: 8px; margin-bottom: 30px;">
+        <div th:if="${canEdit}" style="background: #f8f9fa; padding: 15px; border: 1px dashed #ccc; border-radius: 8px; margin-bottom: 30px;">
             <h3>Dodaj ćwiczenie z katalogu</h3>
             <form th:action="@{/plans/{id}/addExercise(id=${plan.id})}" method="post">
 
@@ -62,7 +62,7 @@
                     <td th:text="${exercise.name}">Przysiad</td>
                     <td th:text="${exercise.targetMuscle}">Nogi</td>
                     <td>
-                        <form th:action="@{/plans/{planId}/removeExercise/{dayId}/{exId}(planId=${plan.id}, dayId=${day.id}, exId=${exercise.id})}" method="post" style="margin: 0;">
+                        <form th:if="${canEdit}" th:action="@{/plans/{planId}/removeExercise/{dayId}/{exId}(planId=${plan.id}, dayId=${day.id}, exId=${exercise.id})}" method="post" style="margin: 0;">
                             <button type="submit" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">❌ Usuń</button>
                         </form>
                     </td>

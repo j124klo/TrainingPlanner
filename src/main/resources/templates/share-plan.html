@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Udostępnij Plan</title>
+    <style th:replace="~{fragments :: common-css}"></style>
+    <style>
+        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .btn-save { background: #007bff; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; width: 100%; margin-top: 15px;}
+        .warning-box { background: #ffeeba; color: #856404; padding: 15px; border-radius: 4px; margin-bottom: 20px; border: 1px solid #ffe8a1; }
+        label { font-weight: bold; display: block; margin-top: 15px; margin-bottom: 5px; }
+        input[type="text"], select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{fragments :: sidebar}"></div>
+
+<div class="main-content">
+    <div class="container">
+        <h2>Udostępnianie planu: <span th:text="${plan.name}"></span></h2>
+
+        <div th:if="${warning}" class="warning-box">
+            <p th:text="${warning}"></p>
+        </div>
+
+        <form th:action="@{/plans/{id}/share(id=${plan.id})}" method="post">
+
+            <label>Status widoczności:</label>
+            <select name="visibility" id="visibilitySelect" onchange="toggleLogins()">
+                <option value="PRIVATE" th:selected="${plan.visibility.name() == 'PRIVATE'}">🔒 Prywatny (Tylko ja)</option>
+                <option value="SHARED" th:selected="${plan.visibility.name() == 'SHARED'}">👥 Udostępniony wybranym</option>
+                <option value="PUBLIC" th:selected="${plan.visibility.name() == 'PUBLIC'}">🌍 Publiczny (Wszyscy)</option>
+            </select>
+
+            <div id="loginsDiv" style="display: none;">
+                <label>Podaj loginy (oddzielone przecinkiem):</label>
+                <input type="text" name="logins" th:value="${sharedLogins}" placeholder="np. janek, kasia123">
+            </div>
+
+            <div th:if="${warning}" style="margin-top: 20px; border: 1px solid red; padding: 10px; border-radius: 4px;">
+                <input type="checkbox" id="forceShare" name="forceShareExercises" value="true" required>
+                <label for="forceShare" style="display: inline; color: red;">Zgadzam się na zmianę widoczności powiązanych ćwiczeń</label>
+            </div>
+
+            <button type="submit" class="btn-save">Zapisz ustawienia</button>
+        </form>
+
+        <a th:href="@{/plans}" style="display: block; text-align: center; margin-top: 15px; color: #6c757d;">Anuluj i wróć</a>
+    </div>
+</div>
+
+<script>
+    function toggleLogins() {
+        var select = document.getElementById("visibilitySelect");
+        var loginsDiv = document.getElementById("loginsDiv");
+        if (select.value === "SHARED") {
+            loginsDiv.style.display = "block";
+        } else {
+            loginsDiv.style.display = "none";
+        }
+    }
+    window.onload = toggleLogins; // Uruchom przy starcie
+</script>
+</body>
+</html>

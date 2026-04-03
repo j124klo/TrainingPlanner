@@ -50,8 +50,16 @@
                 <td th:text="${exercise.name}">Przysiad</td>
                 <td th:text="${exercise.description}">Opis...</td>
                 <td th:text="${exercise.targetMuscle}">Nogi</td>
-                <td>
-                    <form th:action="@{/exercises/delete/{id}(id=${exercise.id})}" method="post" style="margin: 0;">
+                <td style="display: flex; gap: 5px;">
+                    <form th:action="@{/exercises/clone/{id}(id=${exercise.id})}" method="post" style="margin: 0;">
+                        <button type="submit" style="background: #17a2b8; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px;">📑 Klonuj</button>
+                    </form>
+
+                    <a th:if="${isCoachOrAdmin and #lists.contains(editableIds, exercise.id)}"
+                       th:href="@{/exercises/{id}/share(id=${exercise.id})}"
+                       style="background: #28a745; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px; text-decoration: none;">🤝 Udostępnij</a>
+
+                    <form th:if="${#lists.contains(editableIds, exercise.id)}" th:action="@{/exercises/delete/{id}(id=${exercise.id})}" method="post" style="margin: 0;">
                         <button type="submit" class="btn-delete">🗑️ Usuń</button>
                     </form>
                 </td>

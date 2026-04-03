@@ -48,9 +48,16 @@
                 <td th:text="${plan.id}">1</td>
                 <td th:text="${plan.name}">Mój Plan</td>
                 <td th:text="${plan.description}">Opis...</td>
-                <td style="display: flex; gap: 10px;">
+                <td style="display: flex; gap: 5px;">
                     <a th:href="@{/plans/{id}(id=${plan.id})}" class="btn-details">🔍 Szczegóły</a>
-                    <form th:action="@{/plans/delete/{id}(id=${plan.id})}" method="post" style="margin: 0;">
+
+                    <form th:action="@{/plans/clone/{id}(id=${plan.id})}" method="post" style="margin: 0;">
+                        <button type="submit" style="background: #17a2b8; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px;">📑 Klonuj</button>
+                    </form>
+
+                    <a th:if="${isCoachOrAdmin and #lists.contains(editablePlanIds, plan.id)}" th:href="@{/plans/{id}/share(id=${plan.id})}" style="background: #28a745; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px; text-decoration: none;">🤝 Udostępnij</a>
+
+                    <form th:if="${#lists.contains(editablePlanIds, plan.id)}" th:action="@{/plans/delete/{id}(id=${plan.id})}" method="post" style="margin: 0;">
                         <button type="submit" class="btn-delete">🗑️ Usuń</button>
                     </form>
                 </td>
