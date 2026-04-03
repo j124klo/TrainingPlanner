@@ -2,8 +2,9 @@ package pl.polsl.TrainingPlanner.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import pl.polsl.TrainingPlanner.model.User;
+import java.util.Optional;
 
-// Podajemy klasę (User) i typ jej klucza głównego (Long)
 public interface UserRepository extends JpaRepository<User, Long> {
-    // Macie tu już gotowe metody np. findAll(), save(), deleteById()
+    // Zwraca Optional (czyli może znaleźć użytkownika, ale może też zwrócić "pusto", jeśli taki login nie istnieje)
+    Optional<User> findByLogin(String login);
 }

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <style th:fragment="common-css">
+        body { margin: 0; font-family: Arial, sans-serif; background-color: #f4f4f9; display: flex; height: 100vh; }
+
+        /* Pasek boczny */
+        .sidebar { width: 250px; background-color: #343a40; color: white; display: flex; flex-direction: column; padding-top: 20px; }
+        .sidebar h2 { text-align: center; color: #ffc107; margin-bottom: 30px; font-size: 22px; }
+        .sidebar a { color: #cfd8dc; text-decoration: none; padding: 15px 20px; font-size: 16px; border-bottom: 1px solid #4f5b66; display: block; }
+        .sidebar a:hover { background-color: #495057; color: white; }
+
+        /* Pojemnik na resztę zawartości (po prawej) */
+        .main-content { flex: 1; padding: 40px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+
+<div th:fragment="sidebar" class="sidebar">
+    <h2>TrainingPlanner</h2>
+    <a th:href="@{/dashboard}">🏠 Ekran główny</a>
+    <a th:href="@{/exercises}">💪 Katalog Ćwiczeń</a>
+    <a href="#">📅 Moje Plany</a>
+    <a href="#">📈 Statystyki</a>
+    <a href="#">⚙️ Ustawienia</a>
+</div>
+
+</body>
+</html>

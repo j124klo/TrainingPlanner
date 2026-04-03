@@ -3,54 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <title>Katalog Ćwiczeń</title>
+    <style th:replace="~{fragments :: common-css}"></style>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; }
         .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
         h1 { color: #333; text-align: center; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
         th { background-color: #007bff; color: white; }
         tr:hover { background-color: #f1f1f1; }
+        .form-box { background: #e9ecef; padding: 15px; margin-bottom: 20px; border-radius: 8px; }
+        .btn-add { background: #28a745; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; }
+        .btn-delete { background: #dc3545; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Katalog Ćwiczeń 💪</h1>
+<div th:replace="~{fragments :: sidebar}"></div>
 
-    <div style="background: #e9ecef; padding: 15px; margin-bottom: 20px; border-radius: 8px;">
-        <h3 style="margin-top: 0;">Dodaj nowe ćwiczenie</h3>
-        <form th:action="@{/exercises/add}" th:object="${newExercise}" method="post">
-            <input type="text" th:field="*{name}" placeholder="Nazwa ćwiczenia" required style="padding: 8px; width: 25%;">
-            <input type="text" th:field="*{description}" placeholder="Krótki opis" required style="padding: 8px; width: 30%;">
-            <input type="text" th:field="*{targetMuscle}" placeholder="Partia (np. Plecy)" required style="padding: 8px; width: 15%;">
-            <button type="submit" style="background: #28a745; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px;">➕ Dodaj</button>
-        </form>
+<div class="main-content">
+    <div class="container">
+        <h1>Katalog Ćwiczeń 💪</h1>
+
+        <div class="form-box">
+            <h3 style="margin-top: 0;">Dodaj nowe ćwiczenie</h3>
+            <form th:action="@{/exercises/add}" th:object="${newExercise}" method="post">
+                <input type="text" th:field="*{name}" placeholder="Nazwa ćwiczenia" required style="padding: 8px; width: 25%;">
+                <input type="text" th:field="*{description}" placeholder="Krótki opis" required style="padding: 8px; width: 30%;">
+                <input type="text" th:field="*{targetMuscle}" placeholder="Partia (np. Plecy)" required style="padding: 8px; width: 15%;">
+                <button type="submit" class="btn-add">➕ Dodaj</button>
+            </form>
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nazwa</th>
+                <th>Opis</th>
+                <th>Partia</th>
+                <th>Akcje</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="exercise : ${exercisesList}">
+                <td th:text="${exercise.id}">1</td>
+                <td th:text="${exercise.name}">Przysiad</td>
+                <td th:text="${exercise.description}">Opis...</td>
+                <td th:text="${exercise.targetMuscle}">Nogi</td>
+                <td>
+                    <form th:action="@{/exercises/delete/{id}(id=${exercise.id})}" method="post" style="margin: 0;">
+                        <button type="submit" class="btn-delete">🗑️ Usuń</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
     </div>
-
-    <table>
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nazwa</th>
-            <th>Opis</th>
-            <th>Partia</th>
-            <th>Akcje</th> </tr>
-        </thead>
-        <tbody>
-        <tr th:each="exercise : ${exercisesList}">
-            <td th:text="${exercise.id}">1</td>
-            <td th:text="${exercise.name}">Przysiad</td>
-            <td th:text="${exercise.description}">Opis...</td>
-            <td th:text="${exercise.targetMuscle}">Nogi</td>
-            <td>
-                <form th:action="@{/exercises/delete/{id}(id=${exercise.id})}" method="post" style="margin: 0;">
-                    <button type="submit" style="background: #dc3545; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px;">🗑️ Usuń</button>
-                </form>
-            </td>
-        </tr>
-        </tbody>
-    </table>
 </div>
 
 </body>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Główny - TrainingPlanner</title>
+    <style th:replace="~{fragments :: common-css}"></style>
+    <style>
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ddd; padding-bottom: 10px; margin-bottom: 20px; }
+        .logout-btn { background-color: #dc3545; color: white; text-decoration: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; }
+        .logout-btn:hover { background-color: #c82333; }
+        .welcome-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{fragments :: sidebar}"></div>
+
+<div class="main-content">
+    <div class="header">
+        <h1>Witaj, <span th:text="${username}">Użytkowniku</span>!</h1>
+        <a th:href="@{/logout}" class="logout-btn">Wyloguj się</a>
+    </div>
+
+    <div class="welcome-card">
+        <h3>Co chcesz dzisiaj zrobić?</h3>
+        <p>Wybierz opcję z menu po lewej stronie, aby rozpocząć planowanie treningu.</p>
+    </div>
+</div>
+
+</body>
+</html>
