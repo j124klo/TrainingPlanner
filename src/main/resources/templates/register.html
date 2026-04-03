@@ -22,11 +22,33 @@
     <form th:action="@{/register}" th:object="${newUser}" method="post">
         <input type="text" th:field="*{login}" placeholder="Login" required>
         <input type="password" th:field="*{password}" placeholder="Hasło" required>
+
+        <div style="text-align: left; margin: 15px 0;">
+            <input type="checkbox" id="coachCheckbox" name="isCoach" style="width: auto;" onchange="toggleCoachPassword()">
+            <label for="coachCheckbox">Rejestruję się jako Trener</label>
+        </div>
+
+        <div id="coachPasswordDiv" style="display: none;">
+            <input type="password" name="coachPassword" placeholder="Hasło weryfikacyjne (trener123)">
+        </div>
+
         <button type="submit">Zarejestruj się</button>
     </form>
 
     <p style="font-size: 14px; margin-top: 15px;">Masz już konto? <a th:href="@{/login}">Zaloguj się</a></p>
 </div>
+
+<script>
+    function toggleCoachPassword() {
+        var checkBox = document.getElementById("coachCheckbox");
+        var passwordDiv = document.getElementById("coachPasswordDiv");
+        if (checkBox.checked == true) {
+            passwordDiv.style.display = "block";
+        } else {
+            passwordDiv.style.display = "none";
+        }
+    }
+</script>
 
 </body>
 </html>

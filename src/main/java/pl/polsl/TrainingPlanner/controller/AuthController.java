@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import pl.polsl.TrainingPlanner.model.Role;
 import pl.polsl.TrainingPlanner.model.User;
 import pl.polsl.TrainingPlanner.repository.UserRepository;
 
@@ -29,12 +30,33 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    // DODANO ("newUser") w adnotacji poniżej - to naprawia błąd 500!
-    public String registerUser(@ModelAttribute("newUser") User newUser, Model model) {
+    public String registerUser(@ModelAttribute("newUser") User newUser,
+                               @org.springframework.web.bind.annotation.RequestParam(required = false) boolean isCoach,
+                               @org.springframework.web.bind.annotation.RequestParam(required = false) String coachPassword,
+                               Model model) {
+
+        // 1. Sprawdzenie, czy login jest wolny
         if (userRepository.findByLogin(newUser.getLogin()).isPresent()) {
             model.addAttribute("error", "Taki login jest już zajęty!");
             return "register";
         }
+
+        // 2. Przypisywanie Ról
+        if ("admin".equals(newUser.getLogin())) {
+            newUser.setRole(Role.ADMIN); // Magiczny użytkownik admin
+        } else if (isCoach) {
+            // Weryfikacja hasła dla trenera
+            if ("trener123".equals(coachPassword)) {
+                newUser.setRole(Role.COACH);
+            } else {
+                model.addAttribute("error", "Błędne hasło weryfikacyjne dla trenera!");
+                return "register";
+            }
+        } else {
+            newUser.setRole(Role.USER); // Zwykły użytkownik
+        }
+
+        // 3. Zapis
         userRepository.save(newUser);
         return "redirect:/login";
     }

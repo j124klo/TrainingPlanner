@@ -16,6 +16,11 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    // NOWE POLE: Rola użytkownika
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role = Role.USER; // Domyślnie każdy to zwykły user
+
     // Pusty konstruktor dla Hibernate
     public User() {}
 
@@ -28,4 +33,7 @@ public class User {
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
 }
