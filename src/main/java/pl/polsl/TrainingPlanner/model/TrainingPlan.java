@@ -20,6 +20,17 @@ public class TrainingPlan {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Enumerated(EnumType.STRING)
+    private Visibility visibility = Visibility.PRIVATE;
+
+    @ManyToMany
+    @JoinTable(
+            name = "plan_shared",
+            joinColumns = @JoinColumn(name = "plan_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<User> sharedWith = new ArrayList<>();
+
     // Zamiast ćwiczeń, plan ma teraz listę swoich Dni
     // CascadeType.ALL oznacza, że jeśli usuniemy plan, usuną się też jego dni
     @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -40,6 +51,13 @@ public class TrainingPlan {
 
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
+
+    // ---misc---
+    public Visibility getVisibility() { return visibility; }
+    public void setSharedWith(List<User> sharedWith) { this.sharedWith = sharedWith; }
+
+    public List<User> getSharedWith() { return sharedWith; }
+    public void setVisibility(Visibility visibility) { this.visibility = visibility; }
 
     // ---days---
     public List<PlanDay> getDays() { return days; }

@@ -1,6 +1,8 @@
 package pl.polsl.TrainingPlanner.model;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "exercises") // Nazwa tabeli w PostgreSQL
@@ -13,6 +15,24 @@ public class Exercise {
     private String name;
     private String description;
     private String targetMuscle; // np. Klatka, Plecy, Nogi
+
+    // 1. Kto stworzył to ćwiczenie
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    private User owner;
+
+    // 2. Status widoczności (Domyślnie prywatne)
+    @Enumerated(EnumType.STRING)
+    private Visibility visibility = Visibility.PRIVATE;
+
+    // 3. Lista osób, którym udostępniono to ćwiczenie (jeśli status to SHARED)
+    @ManyToMany
+    @JoinTable(
+            name = "exercise_shared",
+            joinColumns = @JoinColumn(name = "exercise_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<User> sharedWith = new ArrayList<>();
 
     // 1. Pusty konstruktor (wymagany przez Springa/Hibernate)
     public Exercise() {
@@ -37,4 +57,13 @@ public class Exercise {
 
     public String getTargetMuscle() { return targetMuscle; }
     public void setTargetMuscle(String targetMuscle) { this.targetMuscle = targetMuscle; }
+
+    public User getOwner() { return owner; }
+    public void setOwner(User owner) { this.owner = owner; }
+
+    public Visibility getVisibility() { return visibility; }
+    public void setVisibility(Visibility visibility) { this.visibility = visibility; }
+
+    public List<User> getSharedWith() { return sharedWith; }
+    public void setSharedWith(List<User> sharedWith) { this.sharedWith = sharedWith; }
 }
