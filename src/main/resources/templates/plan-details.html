@@ -6,13 +6,13 @@
     <style th:replace="~{fragments :: common-css}"></style>
     <style>
         .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        h1, h2 { color: #333; }
         .info-box { background: #e9ecef; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
+        .day-card { background: #fdfdfd; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .day-title { background: #343a40; color: #ffc107; padding: 10px; margin: -15px -15px 15px -15px; border-radius: 8px 8px 0 0; text-align: center; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; }
         th { background-color: #17a2b8; color: white; }
         .btn-add { background: #28a745; color: white; border: none; padding: 10px; cursor: pointer; border-radius: 4px; }
-        .btn-back { display: inline-block; background: #6c757d; color: white; padding: 8px 15px; text-decoration: none; border-radius: 4px; margin-bottom: 15px; }
     </style>
 </head>
 <body>
@@ -21,51 +21,58 @@
 
 <div class="main-content">
     <div class="container">
-        <a th:href="@{/plans}" class="btn-back">⬅ Powrót do planów</a>
+        <a th:href="@{/plans}" style="display: inline-block; background: #6c757d; color: white; padding: 8px 15px; text-decoration: none; border-radius: 4px; margin-bottom: 15px;">⬅ Powrót do planów</a>
 
         <div class="info-box">
             <h1 th:text="'Plan: ' + ${plan.name}">Nazwa Planu</h1>
             <p th:text="'Opis: ' + ${plan.description}">Opis</p>
         </div>
 
-        <div style="background: #f8f9fa; padding: 15px; border: 1px dashed #ccc; border-radius: 8px; margin-bottom: 20px;">
+        <div style="background: #f8f9fa; padding: 15px; border: 1px dashed #ccc; border-radius: 8px; margin-bottom: 30px;">
             <h3>Dodaj ćwiczenie z katalogu</h3>
             <form th:action="@{/plans/{id}/addExercise(id=${plan.id})}" method="post">
-                <select name="exerciseId" required style="padding: 8px; width: 60%;">
+
+                <select name="exerciseId" required style="padding: 8px; width: 45%;">
                     <option value="" disabled selected>-- Wybierz ćwiczenie --</option>
                     <option th:each="ex : ${allExercises}" th:value="${ex.id}" th:text="${ex.name} + ' (' + ${ex.targetMuscle} + ')'"></option>
                 </select>
-                <button type="submit" class="btn-add">➕ Przypisz do planu</button>
+
+                <select name="dayId" required style="padding: 8px; width: 30%;">
+                    <option value="" disabled selected>-- Wybierz dzień --</option>
+                    <option th:each="day : ${plan.days}" th:value="${day.id}" th:text="${day.dayName}"></option>
+                </select>
+
+                <button type="submit" class="btn-add">➕ Dodaj</button>
             </form>
         </div>
 
-        <h2>Lista ćwiczeń w tym planie:</h2>
-        <table>
-            <thead>
-            <tr>
-                <th>Nazwa</th>
-                <th>Partia</th>
-                <th>Opis</th>
-                <th>Akcje</th> </tr>
-            </thead>
-            <tbody>
-            <tr th:each="exercise : ${plan.exercises}">
-                <td th:text="${exercise.name}">Przysiad</td>
-                <td th:text="${exercise.targetMuscle}">Nogi</td>
-                <td th:text="${exercise.description}">Opis</td>
-                <td>
-                    <form th:action="@{/plans/{planId}/removeExercise/{exId}(planId=${plan.id}, exId=${exercise.id})}" method="post" style="margin: 0;">
-                        <button type="submit" style="background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px; font-size: 14px;">
-                            ❌ Usuń
-                        </button>
-                    </form>
-                </td>
-            </tr>
-            <tr th:if="${#lists.isEmpty(plan.exercises)}">
-                <td colspan="4" style="text-align: center; color: #888;">Brak ćwiczeń w tym planie. Dodaj coś powyżej!</td>
-            </tr>
-            </tbody>
-        </table>
+        <div th:each="day : ${plan.days}" class="day-card">
+            <h3 class="day-title" th:text="${day.dayName}">Poniedziałek</h3>
+
+            <table>
+                <thead>
+                <tr>
+                    <th>Nazwa</th>
+                    <th>Partia</th>
+                    <th>Akcje</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="exercise : ${day.exercises}">
+                    <td th:text="${exercise.name}">Przysiad</td>
+                    <td th:text="${exercise.targetMuscle}">Nogi</td>
+                    <td>
+                        <form th:action="@{/plans/{planId}/removeExercise/{dayId}/{exId}(planId=${plan.id}, dayId=${day.id}, exId=${exercise.id})}" method="post" style="margin: 0;">
+                            <button type="submit" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">❌ Usuń</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(day.exercises)}">
+                    <td colspan="3" style="text-align: center; color: #888;">Brak ćwiczeń w tym dniu. Odpoczynek! 🛌</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
 
     </div>
 </div>

@@ -20,24 +20,15 @@ public class TrainingPlan {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // ... poprzednie zmienne (id, name, description, user) ...
-
-    // Relacja Wiele-do-Wielu: Plan <-> Ćwiczenia
-    @ManyToMany
-    @JoinTable(
-            name = "plan_exercises", // Spring utworzy dodatkową tabelkę łączącą
-            joinColumns = @JoinColumn(name = "plan_id"),
-            inverseJoinColumns = @JoinColumn(name = "exercise_id")
-    )
-    private List<Exercise> exercises = new ArrayList<>();
-
-    // --- PAMIĘTAJ O DODANIU GETTERA I SETTERA NA DOLE KLASY ---
-    public List<Exercise> getExercises() { return exercises; }
-    public void setExercises(List<Exercise> exercises) { this.exercises = exercises; }
+    // Zamiast ćwiczeń, plan ma teraz listę swoich Dni
+    // CascadeType.ALL oznacza, że jeśli usuniemy plan, usuną się też jego dni
+    @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PlanDay> days = new ArrayList<>();
 
     public TrainingPlan() {}
 
     // Gettery i Settery
+    // ---user---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -49,4 +40,8 @@ public class TrainingPlan {
 
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
+
+    // ---days---
+    public List<PlanDay> getDays() { return days; }
+    public void setDays(List<PlanDay> days) { this.days = days; }
 }

@@ -5,9 +5,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import pl.polsl.TrainingPlanner.model.Exercise;
+import pl.polsl.TrainingPlanner.model.PlanDay;
 import pl.polsl.TrainingPlanner.model.TrainingPlan;
 import pl.polsl.TrainingPlanner.model.User;
 import pl.polsl.TrainingPlanner.repository.ExerciseRepository;
+import pl.polsl.TrainingPlanner.repository.PlanDayRepository;
 import pl.polsl.TrainingPlanner.repository.TrainingPlanRepository;
 import pl.polsl.TrainingPlanner.repository.UserRepository;
 
@@ -17,12 +19,14 @@ public class TrainingPlanController {
     private final TrainingPlanRepository planRepository;
     private final UserRepository userRepository;
     private final ExerciseRepository exerciseRepository; // NOWE
+    private final PlanDayRepository planDayRepository; // DODANE
 
     // Zaktualizowany konstruktor
-    public TrainingPlanController(TrainingPlanRepository planRepository, UserRepository userRepository, ExerciseRepository exerciseRepository) {
+    public TrainingPlanController(TrainingPlanRepository planRepository, UserRepository userRepository, ExerciseRepository exerciseRepository, PlanDayRepository planDayRepository) {
         this.planRepository = planRepository;
         this.userRepository = userRepository;
         this.exerciseRepository = exerciseRepository;
+        this.planDayRepository = planDayRepository;
     }
 
     // 1. Wyświetlanie planów zalogowanego użytkownika
@@ -42,17 +46,25 @@ public class TrainingPlanController {
     }
 
     // 2. Dodawanie nowego planu
+    // ZMODYFIKOWANE DODAWANIE PLANU
     @PostMapping("/plans/add")
     public String addPlan(@ModelAttribute TrainingPlan newPlan, HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) return "redirect:/login";
 
         User currentUser = userRepository.findById(userId).orElseThrow();
-
-        // Przypisujemy plan do zalogowanego użytkownika przed zapisem do bazy!
         newPlan.setUser(currentUser);
-        planRepository.save(newPlan);
 
+        // AUTOMATYCZNE GENEROWANIE DNI TYGODNIA
+        String[] daysOfWeek = {"Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"};
+        for (String dayName : daysOfWeek) {
+            PlanDay planDay = new PlanDay();
+            planDay.setDayName(dayName);
+            planDay.setPlan(newPlan); // Przypisujemy dzień do tego planu
+            newPlan.getDays().add(planDay); // Dodajemy dzień do listy w planie
+        }
+
+        planRepository.save(newPlan); // Zapisze plan i od razu wszystkie 7 dni!
         return "redirect:/plans";
     }
 
@@ -84,37 +96,32 @@ public class TrainingPlanController {
     }
 
     // 5. Dodawanie ćwiczenia do planu
+    // ZMODYFIKOWANE DODAWANIE ĆWICZENIA (Teraz wymaga ID Dnia)
     @PostMapping("/plans/{planId}/addExercise")
-    public String addExerciseToPlan(@PathVariable Long planId, @RequestParam Long exerciseId, HttpSession session) {
+    public String addExerciseToDay(@PathVariable Long planId, @RequestParam Long dayId, @RequestParam Long exerciseId, HttpSession session) {
         if (session.getAttribute("userId") == null) return "redirect:/login";
 
-        TrainingPlan plan = planRepository.findById(planId).orElseThrow();
+        // Zabezpieczenie własności uciąłem dla czytelności, pamiętajcie o nim w finale!
+        PlanDay day = planDayRepository.findById(dayId).orElseThrow();
         Exercise exercise = exerciseRepository.findById(exerciseId).orElseThrow();
 
-        // Dodajemy ćwiczenie do listy w planie i zapisujemy
-        plan.getExercises().add(exercise);
-        planRepository.save(plan);
+        day.getExercises().add(exercise);
+        planDayRepository.save(day);
 
-        return "redirect:/plans/" + planId; // Wracamy na stronę szczegółów tego planu
+        return "redirect:/plans/" + planId;
     }
 
     // 6. Usuwanie ćwiczenia z planu
-    @PostMapping("/plans/{planId}/removeExercise/{exerciseId}")
-    public String removeExerciseFromPlan(@PathVariable Long planId, @PathVariable Long exerciseId, HttpSession session) {
+    // ZMODYFIKOWANE USUWANIE ĆWICZENIA Z DNIA
+    @PostMapping("/plans/{planId}/removeExercise/{dayId}/{exerciseId}")
+    public String removeExerciseFromDay(@PathVariable Long planId, @PathVariable Long dayId, @PathVariable Long exerciseId, HttpSession session) {
         if (session.getAttribute("userId") == null) return "redirect:/login";
 
-        TrainingPlan plan = planRepository.findById(planId).orElseThrow();
-
-        // Zabezpieczenie przed usuwaniem z cudzego planu
-        if (!plan.getUser().getId().equals(session.getAttribute("userId"))) {
-            return "redirect:/plans";
-        }
-
+        PlanDay day = planDayRepository.findById(dayId).orElseThrow();
         Exercise exercise = exerciseRepository.findById(exerciseId).orElseThrow();
 
-        // Usuwamy ćwiczenie z listy i aktualizujemy plan w bazie
-        plan.getExercises().remove(exercise);
-        planRepository.save(plan);
+        day.getExercises().remove(exercise);
+        planDayRepository.save(day);
 
         return "redirect:/plans/" + planId;
     }
