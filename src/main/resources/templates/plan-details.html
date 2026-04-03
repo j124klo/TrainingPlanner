@@ -54,7 +54,7 @@
                 <td th:text="${exercise.targetMuscle}">Nogi</td>
                 <td th:text="${exercise.description}">Opis</td>
             </tr>
-            <tr th:if="${plan.exercises.empty}">
+            <tr th:if="${#lists.isEmpty(plan.exercises)}">
                 <td colspan="3" style="text-align: center; color: #888;">Brak ćwiczeń w tym planie. Dodaj coś powyżej!</td>
             </tr>
             </tbody>
