@@ -14,7 +14,9 @@ public class Exercise {
 
     private String name;
     private String description;
-    private String targetMuscle; // np. Klatka, Plecy, Nogi
+
+    @Column(name = "value_types")
+    private String valueTypes;
 
     // 1. Kto stworzył to ćwiczenie
     @ManyToOne
@@ -39,10 +41,10 @@ public class Exercise {
     }
 
     // 2. Konstruktor ułatwiający dodawanie z kodu
-    public Exercise(String name, String description, String targetMuscle) {
+    public Exercise(String name, String description, String valueTypes) {
         this.name = name;
         this.description = description;
-        this.targetMuscle = targetMuscle;
+        this.valueTypes = valueTypes;
     }
 
     // 3. Gettery i Settery (Konieczne dla Thymeleaf i bazy danych!)
@@ -55,8 +57,8 @@ public class Exercise {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public String getTargetMuscle() { return targetMuscle; }
-    public void setTargetMuscle(String targetMuscle) { this.targetMuscle = targetMuscle; }
+    public String getValueTypes() { return valueTypes; }
+    public void setValueTypes(String valueTypes) { this.valueTypes = valueTypes; }
 
     public User getOwner() { return owner; }
     public void setOwner(User owner) { this.owner = owner; }
@@ -66,4 +68,5 @@ public class Exercise {
 
     public List<User> getSharedWith() { return sharedWith; }
     public void setSharedWith(List<User> sharedWith) { this.sharedWith = sharedWith; }
+
 }

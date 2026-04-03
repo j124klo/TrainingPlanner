@@ -21,6 +21,9 @@ public class User {
     @Column(nullable = false)
     private Role role = Role.USER; // Domyślnie każdy to zwykły user
 
+    @Column(name = "current_plan_id")
+    private Long currentPlanId;
+
     // Pusty konstruktor dla Hibernate
     public User() {}
 
@@ -36,4 +39,7 @@ public class User {
 
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }
+
+    public Long getCurrentPlanId() { return currentPlanId; }
+    public void setCurrentPlanId(Long currentPlanId) { this.currentPlanId = currentPlanId; }
 }

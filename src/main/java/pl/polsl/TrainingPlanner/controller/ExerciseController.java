@@ -154,7 +154,7 @@ public class ExerciseController {
             Exercise clone = new Exercise();
             clone.setName(original.getName() + " (Kopia)");
             clone.setDescription(original.getDescription());
-            clone.setTargetMuscle(original.getTargetMuscle());
+            clone.setValueTypes(original.getValueTypes());
             clone.setOwner(currentUser); // Ty stajesz się właścicielem kopii!
             clone.setVisibility(Visibility.PRIVATE);
             exerciseRepository.save(clone);

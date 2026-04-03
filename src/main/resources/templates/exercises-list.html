@@ -29,7 +29,7 @@
             <form th:action="@{/exercises/add}" th:object="${newExercise}" method="post">
                 <input type="text" th:field="*{name}" placeholder="Nazwa ćwiczenia" required style="padding: 8px; width: 25%;">
                 <input type="text" th:field="*{description}" placeholder="Krótki opis" required style="padding: 8px; width: 30%;">
-                <input type="text" th:field="*{targetMuscle}" placeholder="Partia (np. Plecy)" required style="padding: 8px; width: 15%;">
+                <input type="text" th:field="*{valueTypes}" placeholder="Typ (np. Siłowe)" required style="padding: 8px; width: 15%;">
                 <button type="submit" class="btn-add">➕ Dodaj</button>
             </form>
         </div>
@@ -40,7 +40,7 @@
                 <th>ID</th>
                 <th>Nazwa</th>
                 <th>Opis</th>
-                <th>Partia</th>
+                <th>Typ</th>
                 <th>Akcje</th>
             </tr>
             </thead>
@@ -49,7 +49,7 @@
                 <td th:text="${exercise.id}">1</td>
                 <td th:text="${exercise.name}">Przysiad</td>
                 <td th:text="${exercise.description}">Opis...</td>
-                <td th:text="${exercise.targetMuscle}">Nogi</td>
+                <td th:text="${exercise.valueTypes}">Siłowe</td>
                 <td style="display: flex; gap: 5px;">
                     <form th:action="@{/exercises/clone/{id}(id=${exercise.id})}" method="post" style="margin: 0;">
                         <button type="submit" style="background: #17a2b8; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px;">📑 Klonuj</button>

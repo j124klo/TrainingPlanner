@@ -31,10 +31,11 @@ public class TrainingPlan {
     )
     private List<User> sharedWith = new ArrayList<>();
 
-    // Zamiast ćwiczeń, plan ma teraz listę swoich Dni
-    // CascadeType.ALL oznacza, że jeśli usuniemy plan, usuną się też jego dni
     @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PlanDay> days = new ArrayList<>();
+    private List<PlanEntry> planEntries = new ArrayList<>();
+
+    public List<PlanEntry> getPlanEntries() { return planEntries; }
+    public void setPlanEntries(List<PlanEntry> planEntries) { this.planEntries = planEntries; }
 
     public TrainingPlan() {}
 
@@ -59,7 +60,4 @@ public class TrainingPlan {
     public List<User> getSharedWith() { return sharedWith; }
     public void setVisibility(Visibility visibility) { this.visibility = visibility; }
 
-    // ---days---
-    public List<PlanDay> getDays() { return days; }
-    public void setDays(List<PlanDay> days) { this.days = days; }
-}
+    }
