@@ -97,4 +97,25 @@ public class TrainingPlanController {
 
         return "redirect:/plans/" + planId; // Wracamy na stronę szczegółów tego planu
     }
+
+    // 6. Usuwanie ćwiczenia z planu
+    @PostMapping("/plans/{planId}/removeExercise/{exerciseId}")
+    public String removeExerciseFromPlan(@PathVariable Long planId, @PathVariable Long exerciseId, HttpSession session) {
+        if (session.getAttribute("userId") == null) return "redirect:/login";
+
+        TrainingPlan plan = planRepository.findById(planId).orElseThrow();
+
+        // Zabezpieczenie przed usuwaniem z cudzego planu
+        if (!plan.getUser().getId().equals(session.getAttribute("userId"))) {
+            return "redirect:/plans";
+        }
+
+        Exercise exercise = exerciseRepository.findById(exerciseId).orElseThrow();
+
+        // Usuwamy ćwiczenie z listy i aktualizujemy plan w bazie
+        plan.getExercises().remove(exercise);
+        planRepository.save(plan);
+
+        return "redirect:/plans/" + planId;
+    }
 }

@@ -46,16 +46,23 @@
                 <th>Nazwa</th>
                 <th>Partia</th>
                 <th>Opis</th>
-            </tr>
+                <th>Akcje</th> </tr>
             </thead>
             <tbody>
             <tr th:each="exercise : ${plan.exercises}">
                 <td th:text="${exercise.name}">Przysiad</td>
                 <td th:text="${exercise.targetMuscle}">Nogi</td>
                 <td th:text="${exercise.description}">Opis</td>
+                <td>
+                    <form th:action="@{/plans/{planId}/removeExercise/{exId}(planId=${plan.id}, exId=${exercise.id})}" method="post" style="margin: 0;">
+                        <button type="submit" style="background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px; font-size: 14px;">
+                            ❌ Usuń
+                        </button>
+                    </form>
+                </td>
             </tr>
             <tr th:if="${#lists.isEmpty(plan.exercises)}">
-                <td colspan="3" style="text-align: center; color: #888;">Brak ćwiczeń w tym planie. Dodaj coś powyżej!</td>
+                <td colspan="4" style="text-align: center; color: #888;">Brak ćwiczeń w tym planie. Dodaj coś powyżej!</td>
             </tr>
             </tbody>
         </table>
