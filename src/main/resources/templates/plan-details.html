@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Szczegóły Planu</title>
+    <style th:replace="~{fragments :: common-css}"></style>
+    <style>
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1, h2 { color: #333; }
+        .info-box { background: #e9ecef; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
+        th { background-color: #17a2b8; color: white; }
+        .btn-add { background: #28a745; color: white; border: none; padding: 10px; cursor: pointer; border-radius: 4px; }
+        .btn-back { display: inline-block; background: #6c757d; color: white; padding: 8px 15px; text-decoration: none; border-radius: 4px; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{fragments :: sidebar}"></div>
+
+<div class="main-content">
+    <div class="container">
+        <a th:href="@{/plans}" class="btn-back">⬅ Powrót do planów</a>
+
+        <div class="info-box">
+            <h1 th:text="'Plan: ' + ${plan.name}">Nazwa Planu</h1>
+            <p th:text="'Opis: ' + ${plan.description}">Opis</p>
+        </div>
+
+        <div style="background: #f8f9fa; padding: 15px; border: 1px dashed #ccc; border-radius: 8px; margin-bottom: 20px;">
+            <h3>Dodaj ćwiczenie z katalogu</h3>
+            <form th:action="@{/plans/{id}/addExercise(id=${plan.id})}" method="post">
+                <select name="exerciseId" required style="padding: 8px; width: 60%;">
+                    <option value="" disabled selected>-- Wybierz ćwiczenie --</option>
+                    <option th:each="ex : ${allExercises}" th:value="${ex.id}" th:text="${ex.name} + ' (' + ${ex.targetMuscle} + ')'"></option>
+                </select>
+                <button type="submit" class="btn-add">➕ Przypisz do planu</button>
+            </form>
+        </div>
+
+        <h2>Lista ćwiczeń w tym planie:</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>Nazwa</th>
+                <th>Partia</th>
+                <th>Opis</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="exercise : ${plan.exercises}">
+                <td th:text="${exercise.name}">Przysiad</td>
+                <td th:text="${exercise.targetMuscle}">Nogi</td>
+                <td th:text="${exercise.description}">Opis</td>
+            </tr>
+            <tr th:if="${plan.exercises.empty}">
+                <td colspan="3" style="text-align: center; color: #888;">Brak ćwiczeń w tym planie. Dodaj coś powyżej!</td>
+            </tr>
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+</body>
+</html>
