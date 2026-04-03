@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista Użytkowników</title>
+</head>
+<body>
+<h1>Zarejestrowani w TrainingPlanner</h1>
+
+<ul>
+    <li th:each="user : ${usersList}"
+        th:text="${user.login} + ' (ID: ' + ${user.id} + ')'">
+    </li>
+</ul>
+</body>
+</html>

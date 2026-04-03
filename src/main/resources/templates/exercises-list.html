@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Katalog Ćwiczeń</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
+        th { background-color: #007bff; color: white; }
+        tr:hover { background-color: #f1f1f1; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Katalog Ćwiczeń 💪</h1>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nazwa</th>
+            <th>Opis</th>
+            <th>Partia Mięśniowa</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="exercise : ${exercisesList}">
+            <td th:text="${exercise.id}">1</td>
+            <td th:text="${exercise.name}">Przysiad</td>
+            <td th:text="${exercise.description}">Opis ćwiczenia...</td>
+            <td th:text="${exercise.targetMuscle}">Nogi</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>
