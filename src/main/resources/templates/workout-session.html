@@ -29,11 +29,20 @@
         <h3 th:text="${exercise.name}" style="margin-top: 0; color: #007bff; border-bottom: 1px solid #eee; padding-bottom: 10px;"></h3>
 
         <table th:if="${logsByExercise.containsKey(exercise.id)}" class="log-table">
-            <tr><th>Seria</th><th>Ciężar (kg)</th><th>Powtórzenia</th><th>✔</th></tr>
+            <tr>
+                <th>Seria</th>
+                <th th:if="${exercise.valueTypes == 'Ciężar + Powtórzenia'}">Ciężar (kg)</th>
+                <th th:if="${exercise.valueTypes == 'Dystans + Czas'}">Dystans (km)</th>
+                <th th:if="${exercise.valueTypes == 'Dystans + Czas' or exercise.valueTypes == 'Czas + Powtórzenia' or exercise.valueTypes == 'Tylko Czas'}">Czas (min)</th>
+                <th th:if="${exercise.valueTypes == 'Ciężar + Powtórzenia' or exercise.valueTypes == 'Tylko Powtórzenia' or exercise.valueTypes == 'Czas + Powtórzenia'}">Powtórzenia</th>
+                <th>✔</th>
+            </tr>
             <tr th:each="log : ${logsByExercise.get(exercise.id)}">
                 <td th:text="${log.setNumber}"></td>
-                <td th:text="${log.weight}"></td>
-                <td th:text="${log.reps}"></td>
+                <td th:if="${exercise.valueTypes == 'Ciężar + Powtórzenia'}" th:text="${log.weight}"></td>
+                <td th:if="${exercise.valueTypes == 'Dystans + Czas'}" th:text="${log.distance}"></td>
+                <td th:if="${exercise.valueTypes == 'Dystans + Czas' or exercise.valueTypes == 'Czas + Powtórzenia' or exercise.valueTypes == 'Tylko Czas'}" th:text="${log.timeMinutes}"></td>
+                <td th:if="${exercise.valueTypes == 'Ciężar + Powtórzenia' or exercise.valueTypes == 'Tylko Powtórzenia' or exercise.valueTypes == 'Czas + Powtórzenia'}" th:text="${log.reps}"></td>
                 <td style="color: green; font-weight:bold;">OK</td>
             </tr>
         </table>
@@ -44,14 +53,24 @@
                 <label>Seria</label>
                 <input type="number" name="setNumber" th:value="${logsByExercise.containsKey(exercise.id) ? logsByExercise.get(exercise.id).size() + 1 : 1}" required>
             </div>
-            <div class="input-group">
+
+            <div class="input-group" th:if="${exercise.valueTypes == 'Ciężar + Powtórzenia'}">
                 <label>Ciężar (kg)</label>
                 <input type="number" step="0.5" name="weight" required>
             </div>
-            <div class="input-group">
+            <div class="input-group" th:if="${exercise.valueTypes == 'Dystans + Czas'}">
+                <label>Dystans (km)</label>
+                <input type="number" step="0.1" name="distance" required>
+            </div>
+            <div class="input-group" th:if="${exercise.valueTypes == 'Dystans + Czas' or exercise.valueTypes == 'Czas + Powtórzenia' or exercise.valueTypes == 'Tylko Czas'}">
+                <label>Czas (min)</label>
+                <input type="number" name="timeMinutes" required>
+            </div>
+            <div class="input-group" th:if="${exercise.valueTypes == 'Ciężar + Powtórzenia' or exercise.valueTypes == 'Tylko Powtórzenia' or exercise.valueTypes == 'Czas + Powtórzenia'}">
                 <label>Powtórzenia</label>
                 <input type="number" name="reps" required>
             </div>
+
             <button type="submit" class="btn-log">ZAPISZ</button>
         </form>
     </div>
@@ -61,25 +80,72 @@
         <form th:action="@{/workout/log}" method="post" class="flex-row">
             <div class="input-group" style="flex: 2;">
                 <label>Wybierz ćwiczenie</label>
-                <select name="exerciseId" required>
-                    <option value="" disabled selected>-- Wybierz z katalogu --</option>
-                    <option th:each="ex : ${allExercises}" th:value="${ex.id}" th:text="${ex.name}"></option>
+                <select name="exerciseId" id="extraSelect" onchange="updateExtraFields()" required>
+                    <option value="" disabled selected data-type="">-- Wybierz z katalogu --</option>
+                    <option th:each="ex : ${allExercises}" th:value="${ex.id}" th:text="${ex.name}" th:data-type="${ex.valueTypes}"></option>
                 </select>
             </div>
             <input type="hidden" name="setNumber" value="1">
-            <div class="input-group">
+
+            <div class="input-group" id="fWeight" style="display:none;">
                 <label>Ciężar (kg)</label>
-                <input type="number" step="0.5" name="weight" required>
+                <input type="number" step="0.5" name="weight" id="iWeight">
             </div>
-            <div class="input-group">
+            <div class="input-group" id="fDist" style="display:none;">
+                <label>Dystans (km)</label>
+                <input type="number" step="0.1" name="distance" id="iDist">
+            </div>
+            <div class="input-group" id="fTime" style="display:none;">
+                <label>Czas (min)</label>
+                <input type="number" name="timeMinutes" id="iTime">
+            </div>
+            <div class="input-group" id="fReps" style="display:none;">
                 <label>Powtórzenia</label>
-                <input type="number" name="reps" required>
+                <input type="number" name="reps" id="iReps">
             </div>
+
             <button type="submit" class="btn-log">DODAJ</button>
         </form>
     </div>
 
     <a th:href="@{/dashboard}" style="display: block; text-align: center; margin-top: 20px; color: #333; font-weight: bold; text-decoration: none; padding: 10px; border: 2px solid #333; background: #e0e0e0;">ZAKOŃCZ TRENING</a>
 </div>
+
+<script>
+    function updateExtraFields() {
+        var select = document.getElementById("extraSelect");
+        var type = select.options[select.selectedIndex].getAttribute("data-type");
+
+        var fWeight = document.getElementById("fWeight"), iWeight = document.getElementById("iWeight");
+        var fDist = document.getElementById("fDist"), iDist = document.getElementById("iDist");
+        var fTime = document.getElementById("fTime"), iTime = document.getElementById("iTime");
+        var fReps = document.getElementById("fReps"), iReps = document.getElementById("iReps");
+
+        // Najpierw ukrywamy wszystkie pola i usuwamy z nich wymóg "required"
+        fWeight.style.display = "none"; iWeight.required = false;
+        fDist.style.display = "none"; iDist.required = false;
+        fTime.style.display = "none"; iTime.required = false;
+        fReps.style.display = "none"; iReps.required = false;
+
+        // Jeśli nic nie wybrano, przerywamy
+        if (!type) return;
+
+        // Pokazujemy tylko te pola, których wymaga typ ćwiczenia i ustawiamy jako obowiązkowe
+        if (type === 'Ciężar + Powtórzenia') {
+            fWeight.style.display = "block"; iWeight.required = true;
+            fReps.style.display = "block"; iReps.required = true;
+        } else if (type === 'Tylko Powtórzenia') {
+            fReps.style.display = "block"; iReps.required = true;
+        } else if (type === 'Czas + Powtórzenia') {
+            fTime.style.display = "block"; iTime.required = true;
+            fReps.style.display = "block"; iReps.required = true;
+        } else if (type === 'Dystans + Czas') {
+            fDist.style.display = "block"; iDist.required = true;
+            fTime.style.display = "block"; iTime.required = true;
+        } else if (type === 'Tylko Czas') {
+            fTime.style.display = "block"; iTime.required = true;
+        }
+    }
+</script>
 </body>
 </html>

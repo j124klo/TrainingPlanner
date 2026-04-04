@@ -52,6 +52,8 @@ public class ExerciseController {
         boolean isCoachOrAdmin = currentUser.getRole() == pl.polsl.TrainingPlanner.model.Role.COACH || currentUser.getRole() == pl.polsl.TrainingPlanner.model.Role.ADMIN;
         model.addAttribute("isCoachOrAdmin", isCoachOrAdmin);
 
+        model.addAttribute("user", currentUser);
+
         return "exercises-list";
     }
 
@@ -135,6 +137,41 @@ public class ExerciseController {
             exerciseRepository.save(clone);
         }
 
+        return "redirect:/exercises";
+    }
+
+    @GetMapping("/exercises/edit/{id}")
+    public String showEditForm(@PathVariable Long id, HttpSession session, Model model) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) return "redirect:/login";
+
+        User currentUser = userRepository.findById(userId).orElseThrow();
+        Exercise exercise = exerciseRepository.findById(id).orElseThrow();
+
+        // Sprawdzamy czy użytkownik ma prawo edytować to ćwiczenie
+        if (!accessService.canEditExercise(exercise, currentUser)) {
+            return "redirect:/exercises";
+        }
+
+        model.addAttribute("user", currentUser); // Menu boczne
+        model.addAttribute("exercise", exercise);
+        return "edit-exercise";
+    }
+
+    @PostMapping("/exercises/edit/{id}")
+    public String editExercise(@PathVariable Long id, @ModelAttribute Exercise updatedExercise, HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) return "redirect:/login";
+
+        User currentUser = userRepository.findById(userId).orElseThrow();
+        Exercise exercise = exerciseRepository.findById(id).orElseThrow();
+
+        if (accessService.canEditExercise(exercise, currentUser)) {
+            exercise.setName(updatedExercise.getName());
+            exercise.setDescription(updatedExercise.getDescription());
+            exercise.setValueTypes(updatedExercise.getValueTypes());
+            exerciseRepository.save(exercise);
+        }
         return "redirect:/exercises";
     }
 }

@@ -2,69 +2,58 @@
 <html lang="pl" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Moje Plany Treningowe</title>
+    <title>Moje Plany</title>
     <style th:replace="~{fragments :: common-css}"></style>
     <style>
-        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        h1 { color: #333; text-align: center; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
-        th { background-color: #ffc107; color: #333; } /* Inny kolor nagłówka dla odróżnienia */
-        tr:hover { background-color: #f1f1f1; }
-        .form-box { background: #e9ecef; padding: 15px; margin-bottom: 20px; border-radius: 8px; }
-        .btn-add { background: #28a745; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; }
-        .btn-delete { background: #dc3545; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px; }
-        .btn-details { background: #17a2b8; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px; text-decoration: none;}
+        .box-section { background: #fff; border: 2px solid #333; padding: 20px; margin-bottom: 25px; }
+        .table-data { width: 100%; border-collapse: collapse; text-align: left; }
+        .table-data th, .table-data td { border-bottom: 1px solid #ccc; padding: 10px; }
+        .table-data th { background: #e9ecef; border: 1px solid #aaa; text-transform: uppercase; }
+        .btn-black { background: #333; color: white; border: none; padding: 8px 12px; cursor: pointer; text-transform: uppercase; font-weight: bold; text-decoration: none; display: inline-block; font-size: 0.85em;}
+        .btn-black:hover { background: #555; }
+        .btn-active { background: #ffc107; color: black; }
+        .flex-form { display: flex; gap: 10px; align-items: center; }
+        .flex-form input { padding: 10px; border: 1px solid #aaa; flex: 1; }
     </style>
 </head>
 <body>
-
 <div th:replace="~{fragments :: sidebar}"></div>
-
 <div class="main-content">
-    <div class="container">
-        <h1>Moje Plany Treningowe 📅</h1>
+    <h2 style="text-transform: uppercase; border-bottom: 2px solid #333; padding-bottom: 10px; margin-top:0;">Training Plans</h2>
 
-        <div class="form-box">
-            <h3 style="margin-top: 0;">Stwórz nowy plan</h3>
-            <form th:action="@{/plans/add}" th:object="${newPlan}" method="post">
-                <input type="text" th:field="*{name}" placeholder="Nazwa planu (np. FBW, Push-Pull)" required style="padding: 8px; width: 35%;">
-                <input type="text" th:field="*{description}" placeholder="Krótki opis" required style="padding: 8px; width: 40%;">
-                <button type="submit" class="btn-add">➕ Stwórz</button>
-            </form>
-        </div>
+    <div class="box-section">
+        <h3 style="margin-top:0;">Stwórz nowy plan</h3>
+        <form th:action="@{/plans/add}" th:object="${newPlan}" method="post" class="flex-form">
+            <input type="text" th:field="*{name}" placeholder="Nazwa planu (np. Push Pull Legs)" required>
+            <input type="text" th:field="*{description}" placeholder="Krótki opis" required>
+            <button type="submit" class="btn-black">DODAJ</button>
+        </form>
+    </div>
 
-        <table>
+    <div class="box-section">
+        <table class="table-data">
             <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nazwa Planu</th>
-                <th>Opis</th>
-                <th>Akcje</th>
-            </tr>
+            <tr><th>Nazwa</th><th>Opis</th><th>Status</th><th>Akcje</th></tr>
             </thead>
             <tbody>
             <tr th:each="plan : ${plansList}">
-                <td th:text="${plan.id}">1</td>
-                <td th:text="${plan.name}">Mój Plan</td>
-                <td th:text="${plan.description}">Opis...</td>
-                <td style="display: flex; gap: 5px;">
-                    <a th:href="@{/plans/{id}(id=${plan.id})}" class="btn-details">🔍 Szczegóły</a>
-
-                    <form th:action="@{/plans/clone/{id}(id=${plan.id})}" method="post" style="margin: 0;">
-                        <button type="submit" style="background: #17a2b8; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px;">📑 Klonuj</button>
-                    </form>
-
-                    <a th:if="${isCoachOrAdmin and #lists.contains(editablePlanIds, plan.id)}" th:href="@{/plans/{id}/share(id=${plan.id})}" style="background: #28a745; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px; text-decoration: none;">🤝 Udostępnij</a>
-
-                    <form th:if="${#lists.contains(editablePlanIds, plan.id)}" th:action="@{/plans/delete/{id}(id=${plan.id})}" method="post" style="margin: 0;">
-                        <button type="submit" class="btn-delete">🗑️ Usuń</button>
-                    </form>
+                <td style="font-weight: bold;" th:text="${plan.name}"></td>
+                <td th:text="${plan.description}"></td>
+                <td>
                     <form th:action="@{/plans/activate/{id}(id=${plan.id})}" method="post" style="margin: 0;">
-                        <button type="submit"
-                                th:style="${user.currentPlanId == plan.id} ? 'background: #ffc107; color: black; border: none; padding: 6px 12px; border-radius: 4px;' : 'background: #6c757d; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px;'">
-                            <span th:text="${user.currentPlanId == plan.id} ? '⭐ Aktywny' : '⚪ Aktywuj'"></span>
+                        <button type="submit" th:classappend="${user.currentPlanId == plan.id} ? 'btn-active' : ''" class="btn-black">
+                            <span th:text="${user.currentPlanId == plan.id} ? '★ AKTYWNY' : 'AKTYWUJ'"></span>
                         </button>
+                    </form>
+                </td>
+                <td style="display: flex; gap: 5px;">
+                    <a th:href="@{/plans/{id}(id=${plan.id})}" class="btn-black">SZCZEGÓŁY</a>
+                    <form th:action="@{/plans/clone/{id}(id=${plan.id})}" method="post" style="margin: 0;">
+                        <button type="submit" class="btn-black">KLONUJ</button>
+                    </form>
+                    <a th:if="${isCoachOrAdmin and #lists.contains(editablePlanIds, plan.id)}" th:href="@{/plans/{id}/share(id=${plan.id})}" class="btn-black">WIDOCZNOŚĆ</a>
+                    <form th:if="${#lists.contains(editablePlanIds, plan.id)}" th:action="@{/plans/delete/{id}(id=${plan.id})}" method="post" style="margin: 0;">
+                        <button type="submit" class="btn-black" style="background: #dc3545;">USUŃ</button>
                     </form>
                 </td>
             </tr>
@@ -72,6 +61,5 @@
         </table>
     </div>
 </div>
-
 </body>
 </html>

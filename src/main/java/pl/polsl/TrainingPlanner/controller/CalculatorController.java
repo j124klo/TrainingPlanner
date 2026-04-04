@@ -1,10 +1,12 @@
 package pl.polsl.TrainingPlanner.controller;
 
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import pl.polsl.TrainingPlanner.repository.UserRepository;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,15 +16,28 @@ import java.util.Map;
 @Controller
 public class CalculatorController {
 
+    private final UserRepository userRepository;
+
+    public CalculatorController(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     @GetMapping("/calculator")
-    public String showCalculator() {
+    public String showCalculator(HttpSession session, Model model) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId != null) {
+            model.addAttribute("user", userRepository.findById(userId).orElseThrow());
+        }
         return "calculator";
     }
 
     @PostMapping("/calculator")
-    public String calculate1RM(@RequestParam double weight, @RequestParam int reps, Model model) {
+    public String calculate1RM(@RequestParam double weight, @RequestParam int reps, HttpSession session, Model model) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId != null) {
+            model.addAttribute("user", userRepository.findById(userId).orElseThrow());
+        }
 
-        // Zamiast Epleya używamy współczynników dokładnie z tabeli (standard NSCA / Brzycki)
         double coefficient;
         switch (reps) {
             case 1: coefficient = 1.0; break;
@@ -36,25 +51,19 @@ public class CalculatorController {
             case 20: coefficient = 0.60; break;
             case 24: coefficient = 0.55; break;
             case 30: coefficient = 0.50; break;
-            default:
-                // Dla nietypowych powtórzeń (np. 3, 5, 7) klasyczny wzór Brzyckiego
-                coefficient = (37.0 - reps) / 36.0;
-                break;
+            default: coefficient = (37.0 - reps) / 36.0; break;
         }
 
-        // Wyliczamy 1RM tak, żeby idealnie zgadzał się z tabelą
         double oneRm = weight / coefficient;
         double rounded1Rm = Math.round(oneRm * 10.0) / 10.0;
 
         int[] percentages = {100, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50};
         int[] estimatedReps = {1, 2, 4, 6, 8, 10, 12, 16, 20, 24, 30};
-
-        java.util.List<java.util.Map<String, Object>> tableData = new java.util.ArrayList<>();
+        List<Map<String, Object>> tableData = new ArrayList<>();
 
         for (int i = 0; i < percentages.length; i++) {
-            java.util.Map<String, Object> row = new java.util.HashMap<>();
+            Map<String, Object> row = new HashMap<>();
             row.put("percent", percentages[i] + "%");
-
             double calcWeight = rounded1Rm * (percentages[i] / 100.0);
             row.put("weight", Math.round(calcWeight * 10.0) / 10.0);
             row.put("reps", estimatedReps[i]);

@@ -41,6 +41,8 @@ public class WorkoutController {
         if (userId == null) return "redirect:/login";
         User currentUser = userRepository.findById(userId).orElseThrow();
 
+        model.addAttribute("user", currentUser);
+
         // 1. Zbieramy ćwiczenia zaplanowane na dzisiaj
         Set<Exercise> sessionExercises = new LinkedHashSet<>();
         if (currentUser.getCurrentPlanId() != null) {
@@ -78,7 +80,7 @@ public class WorkoutController {
     }
 
     @PostMapping("/workout/log")
-    public String logExercise(@RequestParam Long exerciseId, @RequestParam Float weight, @RequestParam Integer reps, @RequestParam Integer setNumber, HttpSession session) {
+    public String logExercise(@RequestParam Long exerciseId, @RequestParam(required = false) Float weight, @RequestParam Integer reps, @RequestParam Integer setNumber, HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) return "redirect:/login";
 

@@ -26,6 +26,8 @@ public class WorkoutLog {
 
     private Float weight;
     private Integer reps;
+    private Float distance;
+    private Integer timeMinutes;
 
     public WorkoutLog() {}
 
@@ -50,4 +52,10 @@ public class WorkoutLog {
 
     public Integer getReps() { return reps; }
     public void setReps(Integer reps) { this.reps = reps; }
+
+    public Float getDistance() { return distance; }
+    public void setDistance(Float distance) { this.distance = distance; }
+
+    public Integer getTimeMinutes() { return timeMinutes; }
+    public void setTimeMinutes(Integer timeMinutes) { this.timeMinutes = timeMinutes; }
 }
