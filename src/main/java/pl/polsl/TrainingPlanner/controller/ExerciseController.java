@@ -6,7 +6,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import pl.polsl.TrainingPlanner.model.Exercise;
 import pl.polsl.TrainingPlanner.model.User;
-import pl.polsl.TrainingPlanner.model.Visibility;
 import pl.polsl.TrainingPlanner.repository.ExerciseRepository;
 import pl.polsl.TrainingPlanner.repository.UserRepository;
 import pl.polsl.TrainingPlanner.service.AccessControlService;
@@ -56,9 +55,7 @@ public class ExerciseController {
         return "exercises-list";
     }
 
-    // ... (tutaj zostają metody addExercise, deleteExercise, cloneExercise) ...
-
-    // --- NOWE: EKRAN UDOSTĘPNIANIA ĆWICZENIA ---
+    // --- EKRAN UDOSTĘPNIANIA ĆWICZENIA (wyczyszczony ze starego kodu) ---
     @GetMapping("/exercises/{id}/share")
     public String showShareForm(@PathVariable Long id, HttpSession session, Model model) {
         Long userId = (Long) session.getAttribute("userId");
@@ -73,42 +70,20 @@ public class ExerciseController {
 
         model.addAttribute("exercise", exercise);
 
-        String sharedLogins = exercise.getSharedWith().stream()
-                .map(User::getLogin)
-                .collect(Collectors.joining(", "));
-        model.addAttribute("sharedLogins", sharedLogins);
-
         return "share-exercise";
     }
 
-    // --- NOWE: ZAPISYWANIE UDOSTĘPNIANIA ĆWICZENIA ---
     @PostMapping("/exercises/{id}/share")
-    public String shareExercise(@PathVariable Long id,
-                                @RequestParam Visibility visibility,
-                                @RequestParam(required = false) String logins,
-                                HttpSession session) {
+    public String shareExercise(@PathVariable Long id, @RequestParam boolean isPublic, HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) return "redirect:/login";
-
         User currentUser = userRepository.findById(userId).orElseThrow();
-        if (currentUser.getRole() == pl.polsl.TrainingPlanner.model.Role.USER) return "redirect:/exercises";
-
         Exercise exercise = exerciseRepository.findById(id).orElseThrow();
-        if (!accessService.canEditExercise(exercise, currentUser)) return "redirect:/exercises";
 
-        // Aktualizujemy status i czyścimy starą listę
-        exercise.setVisibility(visibility);
-        exercise.getSharedWith().clear();
-
-        // Jeśli wybrano SHARED, dodajemy użytkowników po loginach
-        if (visibility == Visibility.SHARED && logins != null && !logins.isEmpty()) {
-            String[] loginArray = logins.split(",");
-            for (String login : loginArray) {
-                userRepository.findByLogin(login.trim()).ifPresent(exercise.getSharedWith()::add);
-            }
+        if (accessService.canEditExercise(exercise, currentUser)) {
+            exercise.setPublic(isPublic);
+            exerciseRepository.save(exercise);
         }
-
-        exerciseRepository.save(exercise);
         return "redirect:/exercises";
     }
 
@@ -119,7 +94,7 @@ public class ExerciseController {
 
         User currentUser = userRepository.findById(userId).orElseThrow();
         newExercise.setOwner(currentUser); // Ustawiamy właściciela!
-        newExercise.setVisibility(Visibility.PRIVATE); // Domyślnie prywatne
+        newExercise.setPublic(false);
 
         exerciseRepository.save(newExercise);
         return "redirect:/exercises";
@@ -140,7 +115,7 @@ public class ExerciseController {
         return "redirect:/exercises";
     }
 
-    // --- NOWOŚĆ: KLONOWANIE ĆWICZENIA ---
+    // --- KLONOWANIE ĆWICZENIA ---
     @PostMapping("/exercises/clone/{id}")
     public String cloneExercise(@PathVariable Long id, HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");
@@ -156,7 +131,7 @@ public class ExerciseController {
             clone.setDescription(original.getDescription());
             clone.setValueTypes(original.getValueTypes());
             clone.setOwner(currentUser); // Ty stajesz się właścicielem kopii!
-            clone.setVisibility(Visibility.PRIVATE);
+            clone.setPublic(false);
             exerciseRepository.save(clone);
         }
 

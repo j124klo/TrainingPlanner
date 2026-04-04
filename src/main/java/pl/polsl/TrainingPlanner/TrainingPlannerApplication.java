@@ -5,7 +5,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import pl.polsl.TrainingPlanner.model.Exercise;
-import pl.polsl.TrainingPlanner.model.Visibility;
 import pl.polsl.TrainingPlanner.repository.ExerciseRepository;
 
 @SpringBootApplication
@@ -22,13 +21,13 @@ public class TrainingPlannerApplication {
 			if (exerciseRepository.count() == 0) {
 
 				Exercise ex1 = new Exercise("Martwy Ciąg", "Podnoszenie sztangi z ziemi", "Siłowe");
-				ex1.setVisibility(Visibility.PUBLIC); // Ustawiamy jako publiczne, żeby każdy je widział!
+				ex1.setPublic(true);
 
 				Exercise ex2 = new Exercise("Wyciskanie na ławce", "Wyciskanie sztangi leżąc", "Siłowe");
-				ex2.setVisibility(Visibility.PUBLIC);
+				ex2.setPublic(true);
 
 				Exercise ex3 = new Exercise("Bieganie na bieżni", "Lekki trucht przez 30 minut", "Kardio");
-				ex3.setVisibility(Visibility.PUBLIC);
+				ex3.setPublic(true);
 
 				exerciseRepository.save(ex1);
 				exerciseRepository.save(ex2);

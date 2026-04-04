@@ -8,14 +8,12 @@ import pl.polsl.TrainingPlanner.model.Exercise;
 import pl.polsl.TrainingPlanner.model.PlanEntry;
 import pl.polsl.TrainingPlanner.model.TrainingPlan;
 import pl.polsl.TrainingPlanner.model.User;
-import pl.polsl.TrainingPlanner.model.Visibility;
 import pl.polsl.TrainingPlanner.repository.ExerciseRepository;
 import pl.polsl.TrainingPlanner.repository.PlanEntryRepository;
 import pl.polsl.TrainingPlanner.repository.TrainingPlanRepository;
 import pl.polsl.TrainingPlanner.repository.UserRepository;
 import pl.polsl.TrainingPlanner.service.AccessControlService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -99,7 +97,7 @@ public class TrainingPlanController {
 
         User currentUser = userRepository.findById(userId).orElseThrow();
         newPlan.setUser(currentUser);
-        newPlan.setVisibility(Visibility.PRIVATE);
+        newPlan.setPublic(false);;
 
         planRepository.save(newPlan);
         return "redirect:/plans";
@@ -158,7 +156,7 @@ public class TrainingPlanController {
         clone.setName(original.getName() + " (Kopia)");
         clone.setDescription(original.getDescription());
         clone.setUser(currentUser);
-        clone.setVisibility(Visibility.PRIVATE);
+        clone.setPublic(false);;
 
         // Zmodyfikowane: Kopiowanie po nowemu (PlanEntry)
         for (PlanEntry originalEntry : original.getPlanEntries()) {
@@ -186,83 +184,48 @@ public class TrainingPlanController {
         if (!accessService.canEditPlan(plan, currentUser)) return "redirect:/plans";
 
         model.addAttribute("plan", plan);
-        String sharedLogins = plan.getSharedWith().stream()
-                .map(User::getLogin)
-                .collect(Collectors.joining(", "));
-        model.addAttribute("sharedLogins", sharedLogins);
 
         return "share-plan";
     }
 
-    // 9. LOGIKA UDOSTĘPNIANIA Z WALIDACJĄ
+    // 9. LOGIKA UDOSTĘPNIANIA Z WALIDACJĄ (Odświeżona pod isPublic)
     @PostMapping("/plans/{id}/share")
     public String sharePlan(@PathVariable Long id,
-                            @RequestParam Visibility visibility,
-                            @RequestParam(required = false) String logins,
+                            @RequestParam boolean isPublic,
                             @RequestParam(required = false) boolean forceShareExercises,
                             HttpSession session, Model model) {
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) return "redirect:/login";
-
         User currentUser = userRepository.findById(userId).orElseThrow();
-        if (currentUser.getRole() == pl.polsl.TrainingPlanner.model.Role.USER) return "redirect:/plans";
-
         TrainingPlan plan = planRepository.findById(id).orElseThrow();
+
         if (!accessService.canEditPlan(plan, currentUser)) return "redirect:/plans";
 
-        List<User> targetUsers = new ArrayList<>();
-        if (visibility == Visibility.SHARED && logins != null && !logins.isEmpty()) {
-            String[] loginArray = logins.split(",");
-            for (String login : loginArray) {
-                userRepository.findByLogin(login.trim()).ifPresent(targetUsers::add);
-            }
-        }
-
         boolean hasHiddenExercises = false;
-        // Zmodyfikowane: Sprawdzanie ukrytych ćwiczeń po nowemu (PlanEntry)
-        for (PlanEntry entry : plan.getPlanEntries()) {
-            Exercise ex = entry.getExercise();
-            if (visibility == Visibility.PUBLIC && ex.getVisibility() != Visibility.PUBLIC) {
+        for (pl.polsl.TrainingPlanner.model.PlanEntry entry : plan.getPlanEntries()) {
+            if (isPublic && !entry.getExercise().isPublic()) {
                 hasHiddenExercises = true;
-            } else if (visibility == Visibility.SHARED) {
-                for (User target : targetUsers) {
-                    if (!accessService.canViewExercise(ex, target)) {
-                        hasHiddenExercises = true;
-                        break;
-                    }
-                }
+                break;
             }
         }
 
         if (hasHiddenExercises && !forceShareExercises) {
             model.addAttribute("plan", plan);
-            model.addAttribute("sharedLogins", logins);
-            model.addAttribute("visibility", visibility);
-            model.addAttribute("warning", "Uwaga! Ten plan zawiera ćwiczenia, do których ci użytkownicy nie mają dostępu. Zaznacz pole poniżej, aby udostępnić je razem z planem.");
+            model.addAttribute("isPublic", isPublic);
+            model.addAttribute("warning", "Uwaga! Plan zawiera prywatne ćwiczenia. Zaznacz poniższe pole, by upublicznić je razem z planem.");
             return "share-plan";
         }
 
-        plan.setVisibility(visibility);
-        plan.getSharedWith().clear();
-        plan.getSharedWith().addAll(targetUsers);
-
+        plan.setPublic(isPublic);
         if (hasHiddenExercises && forceShareExercises) {
-            for (PlanEntry entry : plan.getPlanEntries()) {
+            for (pl.polsl.TrainingPlanner.model.PlanEntry entry : plan.getPlanEntries()) {
                 Exercise ex = entry.getExercise();
                 if (accessService.canEditExercise(ex, currentUser)) {
-                    if (visibility == Visibility.PUBLIC) {
-                        ex.setVisibility(Visibility.PUBLIC);
-                    } else if (visibility == Visibility.SHARED) {
-                        ex.setVisibility(Visibility.SHARED);
-                        for (User target : targetUsers) {
-                            if (!ex.getSharedWith().contains(target)) ex.getSharedWith().add(target);
-                        }
-                    }
+                    ex.setPublic(true);
                     exerciseRepository.save(ex);
                 }
             }
         }
-
         planRepository.save(plan);
         return "redirect:/plans";
     }

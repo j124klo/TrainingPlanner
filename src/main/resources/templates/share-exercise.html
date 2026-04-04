@@ -8,7 +8,7 @@
         .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
         .btn-save { background: #007bff; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; width: 100%; margin-top: 15px;}
         label { font-weight: bold; display: block; margin-top: 15px; margin-bottom: 5px; }
-        input[type="text"], select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -22,16 +22,10 @@
         <form th:action="@{/exercises/{id}/share(id=${exercise.id})}" method="post">
 
             <label>Status widoczności:</label>
-            <select name="visibility" id="visibilitySelect" onchange="toggleLogins()">
-                <option value="PRIVATE" th:selected="${exercise.visibility.name() == 'PRIVATE'}">🔒 Prywatne (Tylko ja)</option>
-                <option value="SHARED" th:selected="${exercise.visibility.name() == 'SHARED'}">👥 Udostępnione wybranym</option>
-                <option value="PUBLIC" th:selected="${exercise.visibility.name() == 'PUBLIC'}">🌍 Publiczne (Wszyscy)</option>
+            <select name="isPublic">
+                <option value="false" th:selected="${!exercise.isPublic}">🔒 Prywatne (Tylko ja)</option>
+                <option value="true" th:selected="${exercise.isPublic}">🌍 Publiczne (Wszyscy)</option>
             </select>
-
-            <div id="loginsDiv" style="display: none;">
-                <label>Podaj loginy (oddzielone przecinkiem):</label>
-                <input type="text" name="logins" th:value="${sharedLogins}" placeholder="np. janek, kasia123">
-            </div>
 
             <button type="submit" class="btn-save">Zapisz ustawienia</button>
         </form>
@@ -40,17 +34,5 @@
     </div>
 </div>
 
-<script>
-    function toggleLogins() {
-        var select = document.getElementById("visibilitySelect");
-        var loginsDiv = document.getElementById("loginsDiv");
-        if (select.value === "SHARED") {
-            loginsDiv.style.display = "block";
-        } else {
-            loginsDiv.style.display = "none";
-        }
-    }
-    window.onload = toggleLogins;
-</script>
 </body>
 </html>

@@ -1,8 +1,8 @@
 package pl.polsl.TrainingPlanner.model;
 
 import jakarta.persistence.*;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "training_plans")
@@ -15,32 +15,20 @@ public class TrainingPlan {
     private String name;
     private String description;
 
-    // Relacja: Wiele planów należy do jednego użytkownika
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private User user;
 
-    @Enumerated(EnumType.STRING)
-    private Visibility visibility = Visibility.PRIVATE;
-
-    @ManyToMany
-    @JoinTable(
-            name = "plan_shared",
-            joinColumns = @JoinColumn(name = "plan_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private List<User> sharedWith = new ArrayList<>();
+    // NOWE POLE ZAMIAST VISIBILITY I SHAREDWITH
+    @Column(name = "is_public")
+    private boolean isPublic = false;
 
     @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PlanEntry> planEntries = new ArrayList<>();
 
-    public List<PlanEntry> getPlanEntries() { return planEntries; }
-    public void setPlanEntries(List<PlanEntry> planEntries) { this.planEntries = planEntries; }
-
     public TrainingPlan() {}
 
-    // Gettery i Settery
-    // ---user---
+    // --- GETTERY I SETTERY ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -53,11 +41,9 @@ public class TrainingPlan {
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
 
-    // ---misc---
-    public Visibility getVisibility() { return visibility; }
-    public void setSharedWith(List<User> sharedWith) { this.sharedWith = sharedWith; }
+    public boolean isPublic() { return isPublic; }
+    public void setPublic(boolean isPublic) { this.isPublic = isPublic; }
 
-    public List<User> getSharedWith() { return sharedWith; }
-    public void setVisibility(Visibility visibility) { this.visibility = visibility; }
-
-    }
+    public List<PlanEntry> getPlanEntries() { return planEntries; }
+    public void setPlanEntries(List<PlanEntry> planEntries) { this.planEntries = planEntries; }
+}

@@ -23,18 +23,9 @@ public class Exercise {
     @JoinColumn(name = "owner_id")
     private User owner;
 
-    // 2. Status widoczności (Domyślnie prywatne)
-    @Enumerated(EnumType.STRING)
-    private Visibility visibility = Visibility.PRIVATE;
-
     // 3. Lista osób, którym udostępniono to ćwiczenie (jeśli status to SHARED)
-    @ManyToMany
-    @JoinTable(
-            name = "exercise_shared",
-            joinColumns = @JoinColumn(name = "exercise_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private List<User> sharedWith = new ArrayList<>();
+    @Column(name = "is_public")
+    private boolean isPublic = false; // Domyślnie prywatne
 
     // 1. Pusty konstruktor (wymagany przez Springa/Hibernate)
     public Exercise() {
@@ -63,10 +54,8 @@ public class Exercise {
     public User getOwner() { return owner; }
     public void setOwner(User owner) { this.owner = owner; }
 
-    public Visibility getVisibility() { return visibility; }
-    public void setVisibility(Visibility visibility) { this.visibility = visibility; }
+    public boolean isPublic() { return isPublic; }
+    public void setPublic(boolean isPublic) { this.isPublic = isPublic; }
 
-    public List<User> getSharedWith() { return sharedWith; }
-    public void setSharedWith(List<User> sharedWith) { this.sharedWith = sharedWith; }
 
 }
