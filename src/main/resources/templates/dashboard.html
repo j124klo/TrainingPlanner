@@ -66,7 +66,14 @@
             <h3 class="pr-header">Recent Personal Records</h3>
             <ul class="pr-list">
                 <li th:each="log : ${recentLogs}" class="pr-item">
-                    <span class="pr-name" th:text="${log.exercise.name} + ' - ' + ${log.weight} + ' kg (x' + ${log.reps} + ')'">Deadlift - 180 kg</span>
+                        <span class="pr-name">
+                            <strong th:text="${log.exercise.name}"></strong> -
+
+                            <span th:if="${log.weight != null and log.weight > 0}" th:text="${log.weight} + ' kg '"></span>
+                            <span th:if="${log.reps != null and log.reps > 0}" th:text="'(x' + ${log.reps} + ') '"></span>
+                            <span th:if="${log.distance != null and log.distance > 0}" th:text="${log.distance} + ' km '"></span>
+                            <span th:if="${log.timeMinutes != null and log.timeMinutes > 0}" th:text="${log.timeMinutes} + ' min'"></span>
+                        </span>
                     <span class="pr-date" th:text="${log.date}">Today</span>
                 </li>
                 <li th:if="${#lists.isEmpty(recentLogs)}" class="pr-item" style="color: #888;">

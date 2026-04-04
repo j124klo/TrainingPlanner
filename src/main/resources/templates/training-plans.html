@@ -46,8 +46,9 @@
                         </button>
                     </form>
                 </td>
-                <td style="display: flex; gap: 5px;">
+                <td style="display: flex; gap: 5px; flex-wrap: wrap;">
                     <a th:href="@{/plans/{id}(id=${plan.id})}" class="btn-black">SZCZEGÓŁY</a>
+                    <a th:if="${#lists.contains(editablePlanIds, plan.id)}" th:href="@{/plans/edit/{id}(id=${plan.id})}" class="btn-black" style="background: #ffc107; color: black;">EDYTUJ</a>
                     <form th:action="@{/plans/clone/{id}(id=${plan.id})}" method="post" style="margin: 0;">
                         <button type="submit" class="btn-black">KLONUJ</button>
                     </form>

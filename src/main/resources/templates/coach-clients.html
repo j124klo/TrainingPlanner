@@ -50,6 +50,14 @@
                 </td>
                 <td>
                     <a th:if="${rel.status == 'ACCEPTED'}" th:href="@{/coach/clients/{id}/workouts(id=${rel.client.id})}" class="btn-black" style="padding: 5px 10px; text-decoration: none; display: inline-block;">Podgląd Treningów</a>
+                    <form th:if="${rel.status == 'ACCEPTED'}" th:action="@{/coach/clients/{id}/assign-plan(id=${rel.client.id})}" method="post" style="display:inline-block; margin-left: 5px;">
+                        <select name="planId" required style="padding: 5px; border: 1px solid #aaa;">
+                            <option value="" disabled selected>Wybierz plan...</option>
+                            <option th:each="plan : ${coachPlans}" th:value="${plan.id}" th:text="${plan.name}"></option>
+                        </select>
+                        <button type="submit" class="btn-black" style="padding: 5px 10px; height:auto;">Przypisz klientowi</button>
+                    </form>
+                    <a th:if="${rel.status == 'ACCEPTED'}" th:href="@{/coach/clients/{id}/reports(id=${rel.client.id})}" class="btn-black" style="padding: 5px 10px; text-decoration: none; display: inline-block; background: #007bff;">Raport i Wykres</a>
                 </td>
             </tr>
         </table>

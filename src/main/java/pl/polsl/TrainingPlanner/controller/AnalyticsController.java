@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam; // <-- TEN IMPORT ROZWIĄZUJE PROBLEM
 import pl.polsl.TrainingPlanner.model.Role;
 import pl.polsl.TrainingPlanner.model.User;
 import pl.polsl.TrainingPlanner.model.WorkoutLog;
@@ -29,6 +30,7 @@ public class AnalyticsController {
         this.relationRepo = relationRepo;
     }
 
+    // 1. PEŁNA HISTORIA TRENINGÓW (Dostępna dla każdego zalogowanego)
     @GetMapping("/history")
     public String showHistory(HttpSession session, Model model) {
         Long userId = (Long) session.getAttribute("userId");
@@ -44,33 +46,49 @@ public class AnalyticsController {
         return "history";
     }
 
-    @GetMapping({"/reports", "/coach/clients/{clientId}/reports"})
-    public String showReports(@PathVariable(required = false) Long clientId, HttpSession session, Model model) {
-        Long loggedInId = (Long) session.getAttribute("userId");
-        if (loggedInId == null) return "redirect:/login";
-        User loggedInUser = userRepository.findById(loggedInId).orElseThrow();
-        model.addAttribute("user", loggedInUser);
+    // 2. RAPORTY I STATYSTYKI (Tylko dla Trenerów oglądających swoich klientów)
+    @GetMapping("/coach/clients/{clientId}/reports")
+    public String showReports(@PathVariable Long clientId,
+                              @RequestParam(required = false) LocalDate startDate,
+                              @RequestParam(required = false) LocalDate endDate,
+                              HttpSession session, Model model) {
+        Long coachId = (Long) session.getAttribute("userId");
+        if (coachId == null) return "redirect:/login";
 
-        Long targetUserId = loggedInId;
+        User coach = userRepository.findById(coachId).orElseThrow();
 
-        if (clientId != null && loggedInUser.getRole() == Role.COACH) {
-            boolean isMyClient = relationRepo.findByCoachId(loggedInId).stream()
-                    .anyMatch(r -> r.getClient().getId().equals(clientId) && r.getStatus().equals("ACCEPTED"));
-            if (isMyClient) {
-                targetUserId = clientId;
-                model.addAttribute("client", userRepository.findById(clientId).orElseThrow());
-            }
+        // Zabezpieczenie: Tylko trener ma tu wstęp!
+        if (coach.getRole() != Role.COACH) {
+            return "redirect:/dashboard";
         }
 
-        // NAPRAWA BŁĘDU LAMBDY: Tworzymy "zamrożoną" kopię zmiennej
-        final Long finalTargetUserId = targetUserId;
+        model.addAttribute("user", coach);
 
+        // Zabezpieczenie: Sprawdzamy czy to na pewno klient tego trenera
+        boolean isMyClient = relationRepo.findByCoachId(coachId).stream()
+                .anyMatch(r -> r.getClient().getId().equals(clientId) && r.getStatus().equals("ACCEPTED"));
+
+        if (!isMyClient) return "redirect:/coach/clients";
+
+        model.addAttribute("client", userRepository.findById(clientId).orElseThrow());
+
+        // Zamrożona zmienna do użycia w strumieniu
+        final Long finalTargetUserId = clientId;
+
+        // FILTROWANIE PO ZAKRESIE DAT
         List<WorkoutLog> logs = logRepository.findAll().stream()
                 .filter(l -> l.getUser().getId().equals(finalTargetUserId))
+                .filter(l -> (startDate == null || !l.getDate().isBefore(startDate)))
+                .filter(l -> (endDate == null || !l.getDate().isAfter(endDate)))
                 .collect(Collectors.toList());
 
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
+
+        // --- RAPORT 1: OBJĘTOŚĆ TRENINGOWA ---
         List<Map<String, Object>> volumeReport = new ArrayList<>();
-        Map<String, List<WorkoutLog>> logsByExercise = logs.stream().collect(Collectors.groupingBy(l -> l.getExercise().getName()));
+        Map<String, List<WorkoutLog>> logsByExercise = logs.stream()
+                .collect(Collectors.groupingBy(l -> l.getExercise().getName()));
 
         for (Map.Entry<String, List<WorkoutLog>> entry : logsByExercise.entrySet()) {
             double totalVolume = entry.getValue().stream()
@@ -87,6 +105,7 @@ public class AnalyticsController {
             volumeReport.add(row);
         }
 
+        // --- RAPORT 2: AKTYWNOŚĆ TRENINGOWA ---
         Map<LocalDate, Long> exercisesPerDay = logs.stream()
                 .collect(Collectors.groupingBy(WorkoutLog::getDate, Collectors.mapping(l -> l.getExercise().getId(), Collectors.toSet())))
                 .entrySet().stream()
@@ -95,6 +114,7 @@ public class AnalyticsController {
         long totalTrainingDays = exercisesPerDay.size();
         double avgExercisesPerDay = totalTrainingDays > 0 ? (double) exercisesPerDay.values().stream().mapToLong(Long::longValue).sum() / totalTrainingDays : 0;
 
+        // --- DANE DLA WYKRESU CHART.JS ---
         Map<LocalDate, Double> dailyVolume = new TreeMap<>();
         for (WorkoutLog log : logs) {
             if (log.getWeight() != null && log.getReps() != null) {

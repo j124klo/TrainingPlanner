@@ -25,7 +25,14 @@
             <input type="text" name="description" th:value="${exercise.description}" required>
 
             <label>Typ (np. Siłowe, Kardio, Interwał):</label>
-            <input type="text" name="valueTypes" th:value="${exercise.valueTypes}" required>
+            <label>Typ (Wybierz z listy):</label>
+            <select name="valueTypes" required style="width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #aaa; box-sizing: border-box;">
+                <option value="Ciężar + Powtórzenia" th:selected="${exercise.valueTypes == 'Ciężar + Powtórzenia'}">Ciężar + Powtórzenia</option>
+                <option value="Tylko Powtórzenia" th:selected="${exercise.valueTypes == 'Tylko Powtórzenia'}">Tylko Powtórzenia</option>
+                <option value="Czas + Powtórzenia" th:selected="${exercise.valueTypes == 'Czas + Powtórzenia'}">Czas + Powtórzenia</option>
+                <option value="Dystans + Czas" th:selected="${exercise.valueTypes == 'Dystans + Czas'}">Dystans + Czas</option>
+                <option value="Tylko Czas" th:selected="${exercise.valueTypes == 'Tylko Czas'}">Tylko Czas</option>
+            </select>
 
             <button type="submit" class="btn-black">ZAPISZ ZMIANY</button>
         </form>

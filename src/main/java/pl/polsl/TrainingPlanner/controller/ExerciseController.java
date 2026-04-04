@@ -26,14 +26,25 @@ public class ExerciseController {
         this.accessService = accessService;
     }
 
-    // --- ZMODYFIKOWANA METODA showExercises ---
     @GetMapping("/exercises")
     public String showExercises(HttpSession session, Model model) {
         Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) return "redirect:/login";
-
-        User currentUser = userRepository.findById(userId).orElseThrow();
         List<Exercise> allExercises = exerciseRepository.findAll();
+
+        if (userId == null) {
+            // GOŚĆ WIDZI TYLKO PUBLICZNE ĆWICZENIA
+            List<Exercise> visibleExercises = allExercises.stream()
+                    .filter(Exercise::isPublic).collect(Collectors.toList());
+            model.addAttribute("exercisesList", visibleExercises);
+            model.addAttribute("editableIds", List.of());
+            model.addAttribute("newExercise", new Exercise());
+            model.addAttribute("isCoachOrAdmin", false);
+            return "exercises-list";
+        }
+
+        // --- STARY KOD DLA ZALOGOWANYCH ---
+        User currentUser = userRepository.findById(userId).orElseThrow();
+        model.addAttribute("user", currentUser);
 
         List<Exercise> visibleExercises = allExercises.stream()
                 .filter(ex -> accessService.canViewExercise(ex, currentUser))
@@ -48,11 +59,8 @@ public class ExerciseController {
         model.addAttribute("editableIds", editableIds);
         model.addAttribute("newExercise", new Exercise());
 
-        // NOWE: Przekazujemy flagę, czy użytkownik to Trener lub Admin
         boolean isCoachOrAdmin = currentUser.getRole() == pl.polsl.TrainingPlanner.model.Role.COACH || currentUser.getRole() == pl.polsl.TrainingPlanner.model.Role.ADMIN;
         model.addAttribute("isCoachOrAdmin", isCoachOrAdmin);
-
-        model.addAttribute("user", currentUser);
 
         return "exercises-list";
     }

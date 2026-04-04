@@ -23,6 +23,11 @@
         <input type="text" name="login" placeholder="Login" required>
         <input type="password" name="password" placeholder="Hasło" required>
         <button type="submit">Zaloguj się</button>
+        <div style="text-align: center; margin-top: 20px;">
+            <a th:href="@{/exercises}" style="background: #e0e0e0; color: #333; padding: 10px 20px; text-decoration: none; font-weight: bold; border: 2px solid #333; display: inline-block;">
+                KONTYNUUJ JAKO GOŚĆ
+            </a>
+        </div>
     </form>
 
     <p style="font-size: 14px; margin-top: 15px;">Nie masz konta? <a th:href="@{/register}">Zarejestruj się</a></p>

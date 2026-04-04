@@ -34,11 +34,14 @@
     <div class="box-section" th:if="${!#maps.isEmpty(maxEndurance)}">
         <h3 class="cat-title">Max Endurance</h3>
         <table class="record-table">
-            <tr><th>Exercise</th><th>Max Reps</th><th>Load (kg)</th><th>Date</th></tr>
+            <tr><th>Exercise</th><th>Max Reps</th><th>Load</th><th>Date</th></tr>
             <tr th:each="entry : ${maxEndurance}">
                 <td style="font-weight: bold;" th:text="${entry.key.name}"></td>
                 <td class="val-highlight" th:text="${entry.value.reps}"></td>
-                <td th:text="${entry.value.weight != null ? entry.value.weight : '0'}"></td>
+                <td>
+                    <span th:if="${entry.value.weight != null and entry.value.weight > 0}" th:text="${entry.value.weight} + ' kg'"></span>
+                    <span th:if="${entry.value.weight == null or entry.value.weight == 0}" style="color: #aaa;">Masa ciała</span>
+                </td>
                 <td style="color:#888;" th:text="${entry.value.date}"></td>
             </tr>
         </table>

@@ -248,4 +248,33 @@ public class TrainingPlanController {
 
         return "redirect:/plans";
     }
+
+    @GetMapping("/plans/edit/{id}")
+    public String showEditPlanForm(@PathVariable Long id, HttpSession session, Model model) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) return "redirect:/login";
+        User currentUser = userRepository.findById(userId).orElseThrow();
+        TrainingPlan plan = planRepository.findById(id).orElseThrow();
+
+        if (!accessService.canEditPlan(plan, currentUser)) return "redirect:/plans";
+
+        model.addAttribute("user", currentUser);
+        model.addAttribute("plan", plan);
+        return "edit-plan";
+    }
+
+    @PostMapping("/plans/edit/{id}")
+    public String editPlan(@PathVariable Long id, @ModelAttribute TrainingPlan updatedPlan, HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) return "redirect:/login";
+        User currentUser = userRepository.findById(userId).orElseThrow();
+        TrainingPlan plan = planRepository.findById(id).orElseThrow();
+
+        if (accessService.canEditPlan(plan, currentUser)) {
+            plan.setName(updatedPlan.getName());
+            plan.setDescription(updatedPlan.getDescription());
+            planRepository.save(plan);
+        }
+        return "redirect:/plans";
+    }
 }

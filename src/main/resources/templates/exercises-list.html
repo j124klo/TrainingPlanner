@@ -46,7 +46,7 @@
                 <td th:text="${exercise.name}"></td>
                 <td th:text="${exercise.description}"></td>
                 <td th:text="${exercise.valueTypes}"></td>
-                <td style="display: flex; gap: 5px;">
+                <td style="display: flex; gap: 5px; flex-wrap: wrap;">
                     <form th:action="@{/exercises/clone/{id}(id=${exercise.id})}" method="post" style="margin: 0;">
                         <button type="submit" class="btn-black">KLONUJ</button>
                     </form>
