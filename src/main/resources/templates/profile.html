@@ -19,7 +19,15 @@
 <div th:replace="~{fragments :: sidebar}"></div>
 <div class="main-content">
     <h2 style="text-transform: uppercase; border-bottom: 2px solid #333; padding-bottom: 10px; margin-top:0;">Profile & Records</h2>
-
+    <div th:if="${!#lists.isEmpty(invites)}" class="box-section" style="background: #fff3cd; border-color: #ffeeba;">
+        <h3 style="color: #856404; margin-top:0;">Otrzymałeś zaproszenia od Trenerów!</h3>
+        <div th:each="inv : ${invites}" style="display:flex; justify-content: space-between; align-items:center; margin-bottom:10px;">
+            <span th:text="'Trener ' + ${inv.coach.login} + ' chce zostać twoim opiekunem.'"></span>
+            <form th:action="@{/profile/accept-coach/{id}(id=${inv.id})}" method="post" style="margin:0;">
+                <button type="submit" class="btn-black" style="width:auto;">Akceptuj</button>
+            </form>
+        </div>
+    </div>
     <div class="grid-container">
         <div class="box-section">
             <h3>Body Measurements</h3>

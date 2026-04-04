@@ -5,9 +5,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import pl.polsl.TrainingPlanner.model.BodyMeasurement;
+import pl.polsl.TrainingPlanner.model.CoachClientRelation;
 import pl.polsl.TrainingPlanner.model.User;
 import pl.polsl.TrainingPlanner.model.UserGoal;
 import pl.polsl.TrainingPlanner.repository.BodyMeasurementRepository;
+import pl.polsl.TrainingPlanner.repository.CoachClientRelationRepository;
 import pl.polsl.TrainingPlanner.repository.UserGoalRepository;
 import pl.polsl.TrainingPlanner.repository.UserRepository;
 
@@ -20,11 +22,17 @@ public class ProfileController {
     private final UserRepository userRepository;
     private final BodyMeasurementRepository measurementRepo;
     private final UserGoalRepository goalRepo;
+    private final CoachClientRelationRepository relationRepo; // DODANE POLE
 
-    public ProfileController(UserRepository userRepository, BodyMeasurementRepository measurementRepo, UserGoalRepository goalRepo) {
+    // POPRAWIONY KONSTRUKTOR (teraz przyjmuje 4 repozytoria)
+    public ProfileController(UserRepository userRepository,
+                             BodyMeasurementRepository measurementRepo,
+                             UserGoalRepository goalRepo,
+                             CoachClientRelationRepository relationRepo) {
         this.userRepository = userRepository;
         this.measurementRepo = measurementRepo;
         this.goalRepo = goalRepo;
+        this.relationRepo = relationRepo;
     }
 
     @GetMapping("/profile")
@@ -35,7 +43,7 @@ public class ProfileController {
         User currentUser = userRepository.findById(userId).orElseThrow();
         model.addAttribute("user", currentUser);
 
-        // Pobieramy wszystkie pomiary i cele
+        // Pobieramy pomiary i cele użytkownika
         List<BodyMeasurement> measurements = measurementRepo.findAll().stream()
                 .filter(m -> m.getUser().getId().equals(userId)).toList();
         List<UserGoal> goals = goalRepo.findAll().stream()
@@ -43,6 +51,11 @@ public class ProfileController {
 
         model.addAttribute("measurements", measurements);
         model.addAttribute("goals", goals);
+
+        // Pobieramy oczekujące zaproszenia od trenerów
+        List<CoachClientRelation> invites = relationRepo.findByClientId(userId).stream()
+                .filter(r -> r.getStatus().equals("PENDING")).toList();
+        model.addAttribute("invites", invites);
 
         return "profile";
     }
@@ -81,6 +94,14 @@ public class ProfileController {
         UserGoal goal = goalRepo.findById(id).orElseThrow();
         goal.setAchieved(!goal.isAchieved());
         goalRepo.save(goal);
+        return "redirect:/profile";
+    }
+
+    @PostMapping("/profile/accept-coach/{id}")
+    public String acceptCoach(@PathVariable Long id) {
+        CoachClientRelation relation = relationRepo.findById(id).orElseThrow();
+        relation.setStatus("ACCEPTED");
+        relationRepo.save(relation);
         return "redirect:/profile";
     }
 }

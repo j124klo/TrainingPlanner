@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Stoper & Interwały</title>
+    <style th:replace="~{fragments :: common-css}"></style>
+    <style>
+        .box-section { background: #fff; border: 2px solid #333; padding: 40px; max-width: 600px; margin: 0 auto; text-align: center; }
+        .display { font-size: 5em; font-family: monospace; font-weight: bold; margin-bottom: 20px; letter-spacing: 2px; }
+
+        .btn-black { background: #333; color: white; border: none; padding: 15px 30px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 1.2em; margin: 5px; width: 140px; }
+        .btn-black:hover { background: #555; }
+        .btn-reset { background: #dc3545; }
+        .btn-reset:hover { background: #c82333; }
+
+        /* Styl przełącznika trybów */
+        .mode-selector { margin-bottom: 30px; display: flex; justify-content: center; gap: 10px; }
+        .btn-mode { padding: 10px 20px; border: 2px solid #333; background: #eee; cursor: pointer; font-weight: bold; text-transform: uppercase;}
+        .btn-mode.active { background: #333; color: white; }
+
+        /* Formularz interwałów */
+        .interval-settings { display: flex; justify-content: space-between; gap: 15px; margin-bottom: 30px; text-align: left;}
+        .interval-settings label { font-weight: bold; font-size: 0.8em; text-transform: uppercase; }
+        .interval-settings input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #aaa; box-sizing: border-box; text-align: center; font-size: 1.2em;}
+
+        .status-text { font-size: 1.5em; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments :: sidebar}"></div>
+
+<div class="main-content">
+    <div class="box-section">
+        <h2 style="text-transform: uppercase; border-bottom: 2px solid #333; padding-bottom: 10px; margin-top:0;">Timer</h2>
+
+        <div class="mode-selector">
+            <button id="btnStandard" class="btn-mode active" onclick="switchMode('standard')">Standard Timer</button>
+            <button id="btnInterval" class="btn-mode" onclick="switchMode('interval')">Interval Timer</button>
+        </div>
+
+        <div id="standardMode">
+            <div class="display" id="display">00:00.00</div>
+            <button class="btn-black" id="startBtn" onclick="startStop()">START</button>
+            <button class="btn-black btn-reset" onclick="reset()">RESET</button>
+        </div>
+
+        <div id="intervalMode" style="display: none;">
+
+            <div class="interval-settings" id="intSettings">
+                <div>
+                    <label>Rundy</label>
+                    <input type="number" id="inpRounds" value="5" min="1">
+                </div>
+                <div>
+                    <label>Praca (sek)</label>
+                    <input type="number" id="inpWork" value="40" min="1">
+                </div>
+                <div>
+                    <label>Odpoczynek (sek)</label>
+                    <input type="number" id="inpRest" value="20" min="1">
+                </div>
+            </div>
+
+            <div class="status-text" id="intStatus" style="color: #333;">READY</div>
+            <div class="display" id="intDisplay" style="font-size: 6em;">00:00</div>
+
+            <button class="btn-black" id="intStartBtn" onclick="startInterval()">START</button>
+            <button class="btn-black btn-reset" onclick="resetInterval()">RESET</button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // --- PRZEŁĄCZANIE TRYBÓW ---
+    function switchMode(mode) {
+        reset();
+        resetInterval();
+        if(mode === 'standard') {
+            document.getElementById('standardMode').style.display = 'block';
+            document.getElementById('intervalMode').style.display = 'none';
+            document.getElementById('btnStandard').classList.add('active');
+            document.getElementById('btnInterval').classList.remove('active');
+        } else {
+            document.getElementById('standardMode').style.display = 'none';
+            document.getElementById('intervalMode').style.display = 'block';
+            document.getElementById('btnStandard').classList.remove('active');
+            document.getElementById('btnInterval').classList.add('active');
+        }
+    }
+
+    // --- ZWYKŁY STOPER ---
+    let startTime = 0;
+    let elapsedTime = 0;
+    let timerInterval;
+    let isRunning = false;
+
+    function updateTime() {
+        const time = Date.now() - startTime + elapsedTime;
+        const milliseconds = Math.floor((time % 1000) / 10);
+        const seconds = Math.floor((time / 1000) % 60);
+        const minutes = Math.floor((time / (1000 * 60)) % 60);
+        document.getElementById("display").innerText =
+            (minutes < 10 ? "0" + minutes : minutes) + ":" +
+            (seconds < 10 ? "0" + seconds : seconds) + "." +
+            (milliseconds < 10 ? "0" + milliseconds : milliseconds);
+    }
+
+    function startStop() {
+        if (isRunning) {
+            clearInterval(timerInterval);
+            elapsedTime += Date.now() - startTime;
+            document.getElementById("startBtn").innerText = "START";
+            document.getElementById("startBtn").style.background = "#333";
+        } else {
+            startTime = Date.now();
+            timerInterval = setInterval(updateTime, 10);
+            document.getElementById("startBtn").innerText = "PAUSE";
+            document.getElementById("startBtn").style.background = "#ffc107";
+            document.getElementById("startBtn").style.color = "black";
+        }
+        isRunning = !isRunning;
+    }
+
+    function reset() {
+        clearInterval(timerInterval);
+        isRunning = false;
+        elapsedTime = 0;
+        document.getElementById("display").innerText = "00:00.00";
+        document.getElementById("startBtn").innerText = "START";
+        document.getElementById("startBtn").style.background = "#333";
+        document.getElementById("startBtn").style.color = "white";
+    }
+
+    // --- STOPER INTERWAŁOWY ---
+    let intTimer;
+    let intRunning = false;
+    let totalRounds = 0;
+    let currentRound = 1;
+    let workSec = 0;
+    let restSec = 0;
+    let timeLeft = 0;
+    let isWorkPhase = true;
+
+    function startInterval() {
+        if (intRunning) {
+            clearInterval(intTimer);
+            intRunning = false;
+            document.getElementById("intStartBtn").innerText = "RESUME";
+            document.getElementById("intStartBtn").style.background = "#333";
+            return;
+        }
+
+        // Pierwsze uruchomienie
+        if (timeLeft === 0) {
+            totalRounds = parseInt(document.getElementById("inpRounds").value);
+            workSec = parseInt(document.getElementById("inpWork").value);
+            restSec = parseInt(document.getElementById("inpRest").value);
+            currentRound = 1;
+            isWorkPhase = true;
+            timeLeft = workSec;
+            document.getElementById("intSettings").style.opacity = "0.5";
+            document.getElementById("intSettings").style.pointerEvents = "none";
+            updateIntervalDisplay();
+        }
+
+        intRunning = true;
+        document.getElementById("intStartBtn").innerText = "PAUSE";
+        document.getElementById("intStartBtn").style.background = "#ffc107";
+        document.getElementById("intStartBtn").style.color = "black";
+
+        intTimer = setInterval(() => {
+            if (timeLeft > 0) {
+                timeLeft--;
+            } else {
+                if (isWorkPhase) {
+                    isWorkPhase = false;
+                    timeLeft = restSec;
+                } else {
+                    currentRound++;
+                    if (currentRound > totalRounds) {
+                        clearInterval(intTimer);
+                        intRunning = false;
+                        document.getElementById("intStatus").innerText = "WORKOUT COMPLETE!";
+                        document.getElementById("intStatus").style.color = "#333";
+                        document.getElementById("intStartBtn").innerText = "START";
+                        document.getElementById("intStartBtn").style.background = "#333";
+                        document.getElementById("intStartBtn").style.color = "white";
+                        document.getElementById("intSettings").style.opacity = "1";
+                        document.getElementById("intSettings").style.pointerEvents = "auto";
+                        return;
+                    }
+                    isWorkPhase = true;
+                    timeLeft = workSec;
+                }
+            }
+            updateIntervalDisplay();
+        }, 1000);
+    }
+
+    function updateIntervalDisplay() {
+        let mins = Math.floor(timeLeft / 60);
+        let secs = timeLeft % 60;
+        document.getElementById("intDisplay").innerText =
+            (mins < 10 ? "0" + mins : mins) + ":" + (secs < 10 ? "0" + secs : secs);
+
+        if (currentRound <= totalRounds) {
+            let statusText = isWorkPhase ? "WORK" : "REST";
+            let color = isWorkPhase ? "#dc3545" : "#28a745"; // Czerwony dla pracy, zielony dla odpoczynku
+            document.getElementById("intStatus").innerText = "ROUND " + currentRound + "/" + totalRounds + " - " + statusText;
+            document.getElementById("intStatus").style.color = color;
+        }
+    }
+
+    function resetInterval() {
+        clearInterval(intTimer);
+        intRunning = false;
+        timeLeft = 0;
+        document.getElementById("intDisplay").innerText = "00:00";
+        document.getElementById("intStatus").innerText = "READY";
+        document.getElementById("intStatus").style.color = "#333";
+        document.getElementById("intStartBtn").innerText = "START";
+        document.getElementById("intStartBtn").style.background = "#333";
+        document.getElementById("intStartBtn").style.color = "white";
+        document.getElementById("intSettings").style.opacity = "1";
+        document.getElementById("intSettings").style.pointerEvents = "auto";
+    }
+</script>
+</body>
+</html>

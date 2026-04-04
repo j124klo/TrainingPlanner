@@ -57,14 +57,16 @@
 <div th:fragment="sidebar" class="sidebar">
     <a th:href="@{/dashboard}" class="nav-btn">HOME</a>
     <a th:href="@{/plans}" class="nav-btn">PLAN</a>
-
     <a th:href="@{/workout/start}" class="nav-btn">START WORKOUT</a>
-
     <a th:href="@{/calculator}" class="nav-btn">1RM CALCULATOR</a>
 
-    <a th:href="@{#}" class="nav-btn">STOPWATCH</a>
+    <a th:href="@{/stopwatch}" class="nav-btn">STOPWATCH</a>
+
     <a th:href="@{/exercises}" class="nav-btn">ALL EXERCISES</a>
-    <a th:href="@{/profile}" class="nav-btn">PERSONAL RECORDS</a>
+    <a th:href="@{/profile}" class="nav-btn">PROFILE & RECORDS</a>
+
+    <a th:if="${user != null and (user.role.name() == 'COACH' or user.role.name() == 'ADMIN')}"
+       th:href="@{/coach/clients}" class="nav-btn" style="background-color: #ffc107;">MY CLIENTS</a>
 
     <div class="spacer"></div>
     <a th:href="@{/logout}" class="nav-btn">LOGOUT</a>
