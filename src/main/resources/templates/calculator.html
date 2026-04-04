@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>1RM Calculator</title>
+    <style th:replace="~{fragments :: common-css}"></style>
+    <style>
+        .box-section {
+            background: #fff;
+            border: 2px solid #333;
+            padding: 30px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 20px;
+            margin-bottom: 5px;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #aaa;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
+        .btn-calc {
+            background: #ccc;
+            border: 2px solid #333;
+            padding: 15px 20px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            text-transform: uppercase;
+            font-size: 1.1em;
+        }
+        .btn-calc:hover { background: #bbb; }
+
+        .result-box {
+            margin-top: 30px;
+            padding: 20px;
+            background: #e9ecef;
+            border: 2px dashed #333;
+            text-align: center;
+            font-size: 1.2em;
+        }
+        .week-table { width: 100%; border-collapse: collapse; text-align: center; } .week-table th, .week-table td { border: 1px solid #aaa; padding: 10px; } .week-table th { background: #e9ecef; }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{fragments :: sidebar}"></div>
+
+<div class="main-content">
+    <div class="box-section">
+        <h2 style="text-transform: uppercase; border-bottom: 2px solid #333; padding-bottom: 10px; margin-top:0;">
+            1RM Calculator
+        </h2>
+
+        <form th:action="@{/calculator}" method="post">
+            <label>Podniesiony ciężar (kg):</label>
+            <input type="number" step="0.5" name="weight" required th:value="${weight != null ? weight : ''}" placeholder="np. 100">
+
+            <label>Liczba powtórzeń:</label>
+            <input type="number" name="reps" required th:value="${reps != null ? reps : ''}" placeholder="np. 5">
+
+            <button type="submit" class="btn-calc">Oblicz 1RM</button>
+        </form>
+
+        <div th:if="${result != null}">
+            <div class="result-box">
+                Twoje szacowane 1 Rep Max to:<br>
+                <strong style="font-size: 2em; display: block; margin-top: 10px;" th:text="${result} + ' kg'"></strong>
+            </div>
+
+            <table class="week-table" style="margin-top: 30px;">
+                <thead>
+                <tr>
+                    <th style="text-align: left;">Procent 1RM</th>
+                    <th style="text-align: left;">Podniesiony ciężar</th>
+                    <th style="text-align: left;">Powtórzenia 1RM</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="row : ${tableData}">
+                    <td style="text-align: left;" th:text="${row.percent}">100%</td>
+                    <td style="text-align: left;" th:text="${row.weight} + ' kg'">100 kg</td>
+                    <td style="text-align: left;" th:text="${row.reps}">1</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

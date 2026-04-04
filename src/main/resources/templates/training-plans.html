@@ -60,6 +60,12 @@
                     <form th:if="${#lists.contains(editablePlanIds, plan.id)}" th:action="@{/plans/delete/{id}(id=${plan.id})}" method="post" style="margin: 0;">
                         <button type="submit" class="btn-delete">🗑️ Usuń</button>
                     </form>
+                    <form th:action="@{/plans/activate/{id}(id=${plan.id})}" method="post" style="margin: 0;">
+                        <button type="submit"
+                                th:style="${user.currentPlanId == plan.id} ? 'background: #ffc107; color: black; border: none; padding: 6px 12px; border-radius: 4px;' : 'background: #6c757d; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px;'">
+                            <span th:text="${user.currentPlanId == plan.id} ? '⭐ Aktywny' : '⚪ Aktywuj'"></span>
+                        </button>
+                    </form>
                 </td>
             </tr>
             </tbody>

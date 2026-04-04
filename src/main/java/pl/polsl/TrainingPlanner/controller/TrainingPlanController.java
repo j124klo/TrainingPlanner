@@ -59,6 +59,8 @@ public class TrainingPlanController {
         boolean isCoachOrAdmin = currentUser.getRole() == pl.polsl.TrainingPlanner.model.Role.COACH || currentUser.getRole() == pl.polsl.TrainingPlanner.model.Role.ADMIN;
         model.addAttribute("isCoachOrAdmin", isCoachOrAdmin);
 
+        model.addAttribute("user", currentUser);
+
         return "training-plans";
     }
 
@@ -227,6 +229,23 @@ public class TrainingPlanController {
             }
         }
         planRepository.save(plan);
+        return "redirect:/plans";
+    }
+
+    @PostMapping("/plans/activate/{id}")
+    public String activatePlan(@PathVariable Long id, HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) return "redirect:/login";
+
+        User currentUser = userRepository.findById(userId).orElseThrow();
+        TrainingPlan plan = planRepository.findById(id).orElseThrow();
+
+        // Sprawdzamy, czy użytkownik ma prawo do tego planu (właściciel lub publiczny)
+        if (accessService.canViewPlan(plan, currentUser)) {
+            currentUser.setCurrentPlanId(id);
+            userRepository.save(currentUser);
+        }
+
         return "redirect:/plans";
     }
 }

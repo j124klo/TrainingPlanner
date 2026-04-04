@@ -2,30 +2,80 @@
 <html lang="pl" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Panel Główny - TrainingPlanner</title>
+    <title>Strona Główna</title>
     <style th:replace="~{fragments :: common-css}"></style>
     <style>
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ddd; padding-bottom: 10px; margin-bottom: 20px; }
-        .logout-btn { background-color: #dc3545; color: white; text-decoration: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; }
-        .logout-btn:hover { background-color: #c82333; }
-        .welcome-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .dashboard-container { padding: 20px; }
+        .box-section { background: #fff; border: 2px solid #333; padding: 20px; margin-bottom: 25px; }
+
+        .week-table { width: 100%; border-collapse: collapse; text-align: center; }
+        .week-table th { background: #e9ecef; border: 1px solid #aaa; padding: 10px; text-transform: uppercase; font-weight: bold; }
+        .week-table td { border: 1px solid #aaa; padding: 15px 5px; vertical-align: top; height: 120px; }
+        .rest-day { color: #888; margin-top: 10px; }
+
+        .exercise-name { display: block; margin-bottom: 8px; font-size: 0.95em; border-bottom: 1px solid #eee; padding-bottom: 4px; }
+        .exercise-name:last-child { border-bottom: none; }
+
+        .pr-header { font-weight: bold; text-transform: uppercase; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 15px; margin-top: 0; }
+        .pr-list { list-style: none; padding: 0; margin: 0; }
+        .pr-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed #ccc; }
+        .pr-item:last-child { border-bottom: none; }
+        .pr-name { font-weight: bold; }
+        .pr-date { color: #777; font-size: 0.9em; }
     </style>
 </head>
 <body>
-
 <div th:replace="~{fragments :: sidebar}"></div>
 
 <div class="main-content">
-    <div class="header">
-        <h1>Witaj, <span th:text="${username}">Użytkowniku</span>!</h1>
-        <a th:href="@{/logout}" class="logout-btn">Wyloguj się</a>
-    </div>
+    <div class="dashboard-container">
 
-    <div class="welcome-card">
-        <h3>Co chcesz dzisiaj zrobić?</h3>
-        <p>Wybierz opcję z menu po lewej stronie, aby rozpocząć planowanie treningu.</p>
+        <div class="box-section">
+            <div th:if="${activePlan == null}">
+                <p style="text-align: center; font-size: 1.2em;">Nie masz aktywnego planu.</p>
+                <div style="text-align: center;">
+                    <a th:href="@{/plans}" style="background: #333; color: white; padding: 10px 20px; text-decoration: none; font-weight: bold;">WYBIERZ PLAN</a>
+                </div>
+            </div>
+
+            <div th:if="${activePlan != null}">
+                <table class="week-table">
+                    <thead>
+                    <tr>
+                        <th>Pon</th><th>Wt</th><th>Śr</th><th>Czw</th><th>Pt</th><th>Sob</th><th>Nd</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td th:each="day : ${#numbers.sequence(1, 7)}">
+                            <div th:if="${weeklyPlan.get(day).isEmpty()}" class="rest-day">Rest</div>
+
+                            <div th:if="${!weeklyPlan.get(day).isEmpty()}">
+                                        <span th:each="entry : ${weeklyPlan.get(day)}"
+                                              th:text="${entry.exercise.name}"
+                                              class="exercise-name"></span>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="box-section">
+            <h3 class="pr-header">Recent Personal Records</h3>
+            <ul class="pr-list">
+                <li th:each="log : ${recentLogs}" class="pr-item">
+                    <span class="pr-name" th:text="${log.exercise.name} + ' - ' + ${log.weight} + ' kg (x' + ${log.reps} + ')'">Deadlift - 180 kg</span>
+                    <span class="pr-date" th:text="${log.date}">Today</span>
+                </li>
+                <li th:if="${#lists.isEmpty(recentLogs)}" class="pr-item" style="color: #888;">
+                    Brak zapisanych treningów. Czas ruszyć na siłownię! 💪
+                </li>
+            </ul>
+        </div>
+
     </div>
 </div>
-
 </body>
 </html>
