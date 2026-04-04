@@ -65,10 +65,11 @@
     <a th:href="@{/profile}" class="nav-btn">PROFILE & GOALS</a>
     <a th:href="@{/records}" class="nav-btn">PERSONAL RECORDS</a>
 
+    <a th:href="@{/history}" class="nav-btn">FULL HISTORY</a>
+    <a th:href="@{/reports}" class="nav-btn">REPORTS & CHARTS</a>
+    <div class="spacer"></div>
     <a th:if="${user != null and (user.role.name() == 'COACH' or user.role.name() == 'ADMIN')}"
        th:href="@{/coach/clients}" class="nav-btn btn-coach">MY CLIENTS</a>
-
-    <div class="spacer"></div>
     <a th:href="@{/logout}" class="nav-btn">LOGOUT</a>
 </div>
 

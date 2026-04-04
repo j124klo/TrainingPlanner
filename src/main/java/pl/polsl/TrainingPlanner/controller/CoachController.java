@@ -7,13 +7,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import pl.polsl.TrainingPlanner.model.CoachClientRelation;
-import pl.polsl.TrainingPlanner.model.Role;
-import pl.polsl.TrainingPlanner.model.User;
-import pl.polsl.TrainingPlanner.model.WorkoutLog;
-import pl.polsl.TrainingPlanner.repository.CoachClientRelationRepository;
-import pl.polsl.TrainingPlanner.repository.UserRepository;
-import pl.polsl.TrainingPlanner.repository.WorkoutLogRepository;
+import pl.polsl.TrainingPlanner.model.*;
+import pl.polsl.TrainingPlanner.repository.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,12 +18,20 @@ public class CoachController {
 
     private final UserRepository userRepository;
     private final CoachClientRelationRepository relationRepository;
-    private final WorkoutLogRepository logRepository; // DODANE!
+    private final WorkoutLogRepository logRepository;
+    private final TrainingPlanRepository planRepository;
+    private final PlanEntryRepository planEntryRepository;
 
-    public CoachController(UserRepository userRepository, CoachClientRelationRepository relationRepository, WorkoutLogRepository logRepository) {
+    public CoachController(UserRepository userRepository,
+                           CoachClientRelationRepository relationRepository,
+                           WorkoutLogRepository logRepository,
+                           TrainingPlanRepository planRepository,
+                           PlanEntryRepository planEntryRepository) {
         this.userRepository = userRepository;
         this.relationRepository = relationRepository;
         this.logRepository = logRepository;
+        this.planRepository = planRepository;
+        this.planEntryRepository = planEntryRepository;
     }
 
     @GetMapping("/coach/clients")
@@ -38,10 +41,16 @@ public class CoachController {
 
         User currentUser = userRepository.findById(userId).orElseThrow();
         if (currentUser.getRole() == Role.USER) return "redirect:/dashboard";
-        model.addAttribute("user", currentUser); // Wymagane dla fragments.html
+        model.addAttribute("user", currentUser);
 
         List<CoachClientRelation> relations = relationRepository.findByCoachId(userId);
         model.addAttribute("relations", relations);
+
+        // Pobieramy plany trenera, żeby mógł je przypisywać z listy rozwijanej
+        List<TrainingPlan> coachPlans = planRepository.findAll().stream()
+                .filter(p -> p.getUser().getId().equals(userId))
+                .toList();
+        model.addAttribute("coachPlans", coachPlans);
 
         return "coach-clients";
     }
@@ -65,7 +74,6 @@ public class CoachController {
         return "redirect:/coach/clients?success";
     }
 
-    // --- NOWOŚĆ: PODGLĄD DZIENNIKA KLIENTA ---
     @GetMapping("/coach/clients/{clientId}/workouts")
     public String viewClientWorkouts(@PathVariable Long clientId, HttpSession session, Model model) {
         Long coachId = (Long) session.getAttribute("userId");
@@ -75,7 +83,6 @@ public class CoachController {
         if (coach.getRole() == Role.USER) return "redirect:/dashboard";
         model.addAttribute("user", coach);
 
-        // Zabezpieczenie: Sprawdzamy, czy ten klient faktycznie przypisany jest do tego trenera
         boolean isMyClient = relationRepository.findByCoachId(coachId).stream()
                 .anyMatch(r -> r.getClient().getId().equals(clientId) && r.getStatus().equals("ACCEPTED"));
 
@@ -84,10 +91,39 @@ public class CoachController {
         User client = userRepository.findById(clientId).orElseThrow();
         model.addAttribute("client", client);
 
-        // Wyciągamy ostatnie logi treningowe klienta
         List<WorkoutLog> logs = logRepository.findTop5ByUserIdOrderByDateDesc(clientId);
         model.addAttribute("logs", logs);
 
         return "client-workouts";
+    }
+
+    @PostMapping("/coach/clients/{clientId}/assign-plan")
+    public String assignPlanToClient(@PathVariable Long clientId, @RequestParam Long planId, HttpSession session) {
+        Long coachId = (Long) session.getAttribute("userId");
+        if (coachId == null) return "redirect:/login";
+
+        User client = userRepository.findById(clientId).orElseThrow();
+        TrainingPlan originalPlan = planRepository.findById(planId).orElseThrow();
+
+        // Klonujemy plan
+        TrainingPlan clone = new TrainingPlan();
+        clone.setName(originalPlan.getName() + " (Od Trenera)");
+        clone.setDescription(originalPlan.getDescription());
+        clone.setUser(client);
+        clone.setPublic(false);
+        planRepository.save(clone);
+
+        for (PlanEntry originalEntry : originalPlan.getPlanEntries()) {
+            PlanEntry cloneEntry = new PlanEntry();
+            cloneEntry.setDayOfWeek(originalEntry.getDayOfWeek());
+            cloneEntry.setPlan(clone);
+            cloneEntry.setExercise(originalEntry.getExercise());
+            planEntryRepository.save(cloneEntry);
+        }
+
+        client.setCurrentPlanId(clone.getId());
+        userRepository.save(client);
+
+        return "redirect:/coach/clients";
     }
 }

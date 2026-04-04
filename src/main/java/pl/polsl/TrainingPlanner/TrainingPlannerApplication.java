@@ -4,12 +4,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import pl.polsl.TrainingPlanner.model.Exercise;
-import pl.polsl.TrainingPlanner.model.User;
-import pl.polsl.TrainingPlanner.model.WorkoutLog;
-import pl.polsl.TrainingPlanner.repository.ExerciseRepository;
-import pl.polsl.TrainingPlanner.repository.UserRepository;
-import pl.polsl.TrainingPlanner.repository.WorkoutLogRepository;
+import pl.polsl.TrainingPlanner.model.*;
+import pl.polsl.TrainingPlanner.repository.*;
 
 import java.time.LocalDate;
 
@@ -21,43 +17,59 @@ public class TrainingPlannerApplication {
 	}
 
 	@Bean
-	public CommandLineRunner initData(ExerciseRepository exerciseRepository, UserRepository userRepository, WorkoutLogRepository workoutLogRepository) {
+	public CommandLineRunner initData(ExerciseRepository exRepo, UserRepository userRepo, WorkoutLogRepository logRepo, TrainingPlanRepository planRepo, CoachClientRelationRepository relRepo) {
 		return args -> {
-			if (exerciseRepository.count() == 0) {
-				// ZMIENIONE TYPY NA NOWE!
-				Exercise ex1 = new Exercise("Martwy Ciąg", "Sztanga", "Ciężar + Powtórzenia");
-				ex1.setPublic(true);
-				Exercise ex2 = new Exercise("Pompki", "Bodyweight", "Tylko Powtórzenia");
-				ex2.setPublic(true);
-				Exercise ex3 = new Exercise("Bieganie", "Bieżnia", "Dystans + Czas");
-				ex3.setPublic(true);
-				Exercise ex4 = new Exercise("Deska (Plank)", "Izometria", "Tylko Czas");
-				ex4.setPublic(true);
+			if (exRepo.count() == 0) {
+				Exercise ex1 = new Exercise("Martwy Ciąg", "Sztanga", "Ciężar + Powtórzenia"); ex1.setPublic(true);
+				Exercise ex2 = new Exercise("Wyciskanie", "Ławka", "Ciężar + Powtórzenia"); ex2.setPublic(true);
+				Exercise ex3 = new Exercise("Bieganie", "Bieżnia", "Dystans + Czas"); ex3.setPublic(true);
+				exRepo.save(ex1); exRepo.save(ex2); exRepo.save(ex3);
 
-				exerciseRepository.save(ex1); exerciseRepository.save(ex2);
-				exerciseRepository.save(ex3); exerciseRepository.save(ex4);
-
-				if (userRepository.count() == 0) {
+				if (userRepo.count() == 0) {
+					// 1. Użytkownik (Klient)
 					User testUser = new User();
 					testUser.setLogin("test"); testUser.setPassword("test");
-					testUser.setRole(pl.polsl.TrainingPlanner.model.Role.USER);
-					userRepository.save(testUser);
+					testUser.setRole(Role.USER);
+					userRepo.save(testUser);
 
-					// Przykładowe logi
-					WorkoutLog log1 = new WorkoutLog();
-					log1.setUser(testUser); log1.setExercise(ex1); log1.setDate(LocalDate.now());
-					log1.setSetNumber(1); log1.setWeight(120.0f); log1.setReps(1);
-					workoutLogRepository.save(log1);
+					// 2. Trener
+					User coachUser = new User();
+					coachUser.setLogin("trener"); coachUser.setPassword("trener");
+					coachUser.setRole(Role.COACH);
+					userRepo.save(coachUser);
 
-					WorkoutLog log2 = new WorkoutLog();
-					log2.setUser(testUser); log2.setExercise(ex2); log2.setDate(LocalDate.now());
-					log2.setSetNumber(1); log2.setReps(25); // Max Endurance
-					workoutLogRepository.save(log2);
+					// 3. Relacja Trener-Klient
+					CoachClientRelation rel = new CoachClientRelation();
+					rel.setCoach(coachUser); rel.setClient(testUser); rel.setStatus("ACCEPTED");
+					relRepo.save(rel);
 
-					WorkoutLog log3 = new WorkoutLog();
-					log3.setUser(testUser); log3.setExercise(ex3); log3.setDate(LocalDate.now());
-					log3.setSetNumber(1); log3.setDistance(10.5f); log3.setTimeMinutes(50); // Max Distance & Time
-					workoutLogRepository.save(log3);
+					// 4. Plan dla trenera (żeby mógł go przypisać klientowi)
+					TrainingPlan coachPlan = new TrainingPlan();
+					coachPlan.setName("Plan Siłowy od Trenera");
+					coachPlan.setDescription("Zbuduj siłę w 4 tygodnie");
+					coachPlan.setUser(coachUser);
+					coachPlan.setPublic(false);
+					planRepo.save(coachPlan);
+
+					// 5. Generowanie 15 dni treningowych (co 2 dni wstecz)
+					float startingWeight = 100.0f;
+					for (int i = 30; i >= 0; i -= 2) {
+						LocalDate workoutDate = LocalDate.now().minusDays(i);
+
+						// Ćwiczenie 1: Martwy Ciąg (3 serie)
+						for(int set = 1; set <= 3; set++) {
+							WorkoutLog log1 = new WorkoutLog();
+							log1.setUser(testUser); log1.setExercise(ex1); log1.setDate(workoutDate);
+							log1.setSetNumber(set); log1.setReps(5); log1.setWeight(startingWeight + (30-i)); // Ciężar rośnie!
+							logRepo.save(log1);
+						}
+						// Ćwiczenie 2: Bieganie (1 seria)
+						WorkoutLog log2 = new WorkoutLog();
+						log2.setUser(testUser); log2.setExercise(ex3); log2.setDate(workoutDate);
+						log2.setSetNumber(1); log2.setDistance(5.0f); log2.setTimeMinutes(30);
+						logRepo.save(log2);
+					}
+					System.out.println("✅ Wygenerowano bazę danych, konta 'test' i 'trener' oraz historię z 30 dni!");
 				}
 			}
 		};
