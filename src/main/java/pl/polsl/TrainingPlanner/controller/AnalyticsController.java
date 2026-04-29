@@ -6,6 +6,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam; // <-- TEN IMPORT ROZWIĄZUJE PROBLEM
+import pl.polsl.TrainingPlanner.model.CoachClientRelation;
 import pl.polsl.TrainingPlanner.model.Role;
 import pl.polsl.TrainingPlanner.model.User;
 import pl.polsl.TrainingPlanner.model.WorkoutLog;
@@ -64,12 +65,22 @@ public class AnalyticsController {
 
         model.addAttribute("user", coach);
 
-        // Zabezpieczenie: Sprawdzamy czy to na pewno klient tego trenera
-        boolean isMyClient = relationRepo.findByCoachId(coachId).stream()
+        // Pobieramy wszystkie relacje trenera
+        List<CoachClientRelation> coachRelations = relationRepo.findByCoachId(coachId);
+
+        // Sprawdzamy czy wybrany clientId należy do tego trenera
+        boolean isMyClient = coachRelations.stream()
                 .anyMatch(r -> r.getClient().getId().equals(clientId) && r.getStatus().equals("ACCEPTED"));
 
         if (!isMyClient) return "redirect:/coach/clients";
 
+        // Wyciągamy listę zaakceptowanych klientów do dropdowna
+        List<User> myClients = coachRelations.stream()
+                .filter(r -> r.getStatus().equals("ACCEPTED"))
+                .map(CoachClientRelation::getClient)
+                .toList();
+
+        model.addAttribute("myClients", myClients); // Przekazujemy listę do HTML
         model.addAttribute("client", userRepository.findById(clientId).orElseThrow());
 
         // Zamrożona zmienna do użycia w strumieniu
@@ -112,7 +123,30 @@ public class AnalyticsController {
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> (long) e.getValue().size(), (a, b) -> a, TreeMap::new));
 
         long totalTrainingDays = exercisesPerDay.size();
-        double avgExercisesPerDay = totalTrainingDays > 0 ? (double) exercisesPerDay.values().stream().mapToLong(Long::longValue).sum() / totalTrainingDays : 0;
+        long totalExercisesInPeriod = exercisesPerDay.values().stream().mapToLong(Long::longValue).sum();
+
+        // Obliczanie średniej na dzień treningowy
+        double avgExercisesPerDay = totalTrainingDays > 0 ? (double) totalExercisesInPeriod / totalTrainingDays : 0;
+
+        // NOWE: Obliczanie średniej na wszystkie dni z zakresu
+        LocalDate rStart = startDate;
+        LocalDate rEnd = endDate;
+
+        // Jeśli daty nie są podane, przyjmij zakres od pierwszego logu do dzisiaj
+        if (rStart == null && !logs.isEmpty()) {
+            rStart = logs.stream().map(WorkoutLog::getDate).min(LocalDate::compareTo).get();
+        }
+        if (rEnd == null) {
+            rEnd = LocalDate.now();
+        }
+
+        double avgExercisesPerRangeDay = 0;
+        if (rStart != null && rEnd != null && !rStart.isAfter(rEnd)) {
+            long daysInRange = java.time.temporal.ChronoUnit.DAYS.between(rStart, rEnd) + 1;
+            avgExercisesPerRangeDay = (double) totalExercisesInPeriod / daysInRange;
+        }
+
+        model.addAttribute("avgExercisesPerRangeDay", Math.round(avgExercisesPerRangeDay * 100.0) / 100.0);
 
         // --- DANE DLA WYKRESU CHART.JS ---
         Map<LocalDate, Double> dailyVolume = new TreeMap<>();

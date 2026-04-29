@@ -40,7 +40,7 @@
                 <td class="val-highlight" th:text="${entry.value.reps}"></td>
                 <td>
                     <span th:if="${entry.value.weight != null and entry.value.weight > 0}" th:text="${entry.value.weight} + ' kg'"></span>
-                    <span th:if="${entry.value.weight == null or entry.value.weight == 0}" style="color: #aaa;">Masa ciała</span>
+                    <span th:if="${entry.value.weight == null or entry.value.weight == 0}" style="color: #aaa;">Bodyweight</span>
                 </td>
                 <td style="color:#888;" th:text="${entry.value.date}"></td>
             </tr>

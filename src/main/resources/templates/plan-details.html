@@ -2,7 +2,7 @@
 <html lang="pl" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Szczegóły Planu</title>
+    <title>Plan Details</title>
     <style th:replace="~{fragments :: common-css}"></style>
     <style>
         .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
@@ -21,61 +21,61 @@
 
 <div class="main-content">
     <div class="container">
-        <a th:href="@{/plans}" style="display: inline-block; background: #6c757d; color: white; padding: 8px 15px; text-decoration: none; border-radius: 4px; margin-bottom: 15px;">⬅ Powrót do planów</a>
+        <a th:href="@{/plans}" style="display: inline-block; background: #6c757d; color: white; padding: 8px 15px; text-decoration: none; border-radius: 4px; margin-bottom: 15px;">⬅ Back to plans</a>
 
         <div class="info-box">
-            <h1 th:text="'Plan: ' + ${plan.name}">Nazwa Planu</h1>
-            <p th:text="'Opis: ' + ${plan.description}">Opis</p>
+            <h1 th:text="'Plan: ' + ${plan.name}">Plan Name</h1>
+            <p th:text="'Description: ' + ${plan.description}">Description</p>
         </div>
 
         <div th:if="${canEdit}" style="background: #f8f9fa; padding: 15px; border: 1px dashed #ccc; border-radius: 8px; margin-bottom: 30px;">
-            <h3>Dodaj ćwiczenie z katalogu</h3>
+            <h3>Add exercise from catalog</h3>
             <form th:action="@{/plans/{id}/addExercise(id=${plan.id})}" method="post">
 
                 <select name="exerciseId" required style="padding: 8px; width: 45%;">
-                    <option value="" disabled selected>-- Wybierz ćwiczenie --</option>
+                    <option value="" disabled selected>-- Select exercise --</option>
                     <option th:each="ex : ${allExercises}" th:value="${ex.id}" th:text="${ex.name} + ' (' + ${ex.valueTypes} + ')'"></option>
                 </select>
 
                 <select name="dayOfWeek" required style="padding: 8px; width: 30%;">
-                    <option value="" disabled selected>-- Wybierz dzień --</option>
-                    <option value="1">Poniedziałek</option>
-                    <option value="2">Wtorek</option>
-                    <option value="3">Środa</option>
-                    <option value="4">Czwartek</option>
-                    <option value="5">Piątek</option>
-                    <option value="6">Sobota</option>
-                    <option value="7">Niedziela</option>
+                    <option value="" disabled selected>-- Select day --</option>
+                    <option value="1">Monday</option>
+                    <option value="2">Tuesday</option>
+                    <option value="3">Wednesday</option>
+                    <option value="4">Thursday</option>
+                    <option value="5">Friday</option>
+                    <option value="6">Saturday</option>
+                    <option value="7">Sunday</option>
                 </select>
 
-                <button type="submit" class="btn-add">➕ Dodaj</button>
+                <button type="submit" class="btn-add">Add</button>
             </form>
         </div>
 
         <div th:each="dayNum : ${#numbers.sequence(1, 7)}" class="day-card">
-            <h3 class="day-title" th:text="${dayNames[dayNum]}">Poniedziałek</h3>
+            <h3 class="day-title" th:text="${dayNames[dayNum]}">Monday</h3>
 
             <table>
                 <thead>
                 <tr>
-                    <th>Nazwa</th>
-                    <th>Typ</th>
-                    <th>Akcje</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody th:with="dayEntries=${plan.planEntries.?[dayOfWeek == __${dayNum}__]}">
 
                 <tr th:each="entry : ${dayEntries}">
-                    <td th:text="${entry.exercise.name}">Przysiad</td>
-                    <td th:text="${entry.exercise.valueTypes}">Siłowe</td>
+                    <td th:text="${entry.exercise.name}">Squat</td>
+                    <td th:text="${entry.exercise.valueTypes}">Strength</td>
                     <td>
                         <form th:if="${canEdit}" th:action="@{/plans/{planId}/removeExercise/{entryId}(planId=${plan.id}, entryId=${entry.id})}" method="post" style="margin: 0;">
-                            <button type="submit" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">❌ Usuń</button>
+                            <button type="submit" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Remove</button>
                         </form>
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(dayEntries)}">
-                    <td colspan="3" style="text-align: center; color: #888;">Brak ćwiczeń w tym dniu. Odpoczynek! 🛌</td>
+                    <td colspan="3" style="text-align: center; color: #888;">No exercises for this day. Rest day!</td>
                 </tr>
                 </tbody>
             </table>

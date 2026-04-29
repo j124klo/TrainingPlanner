@@ -2,7 +2,7 @@
 <html lang="pl" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Rejestracja - TrainingPlanner</title>
+    <title>Registration - TrainingPlanner</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
         .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 300px; text-align: center; }
@@ -15,27 +15,27 @@
 <body>
 
 <div class="card">
-    <h2>Rejestracja</h2>
+    <h2>Registration</h2>
 
     <p class="error" th:if="${error}" th:text="${error}"></p>
 
     <form th:action="@{/register}" th:object="${newUser}" method="post">
         <input type="text" th:field="*{login}" placeholder="Login" required>
-        <input type="password" th:field="*{password}" placeholder="Hasło" required>
+        <input type="password" th:field="*{password}" placeholder="Password" required>
 
         <div style="text-align: left; margin: 15px 0;">
             <input type="checkbox" id="coachCheckbox" name="isCoach" style="width: auto;" onchange="toggleCoachPassword()">
-            <label for="coachCheckbox">Rejestruję się jako Trener</label>
+            <label for="coachCheckbox">I am registering as a Coach</label>
         </div>
 
         <div id="coachPasswordDiv" style="display: none;">
-            <input type="password" name="coachPassword" placeholder="Hasło weryfikacyjne (trener123)">
+            <input type="password" name="coachPassword" placeholder="Verification password (trener123)">
         </div>
 
-        <button type="submit">Zarejestruj się</button>
+        <button type="submit">Sign up</button>
     </form>
 
-    <p style="font-size: 14px; margin-top: 15px;">Masz już konto? <a th:href="@{/login}">Zaloguj się</a></p>
+    <p style="font-size: 14px; margin-top: 15px;">Already have an account? <a th:href="@{/login}">Login</a></p>
 </div>
 
 <script>

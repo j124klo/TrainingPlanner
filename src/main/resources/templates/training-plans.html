@@ -2,7 +2,7 @@
 <html lang="pl" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Moje Plany</title>
+    <title>My Plans</title>
     <style th:replace="~{fragments :: common-css}"></style>
     <style>
         .box-section { background: #fff; border: 2px solid #333; padding: 20px; margin-bottom: 25px; }
@@ -22,18 +22,18 @@
     <h2 style="text-transform: uppercase; border-bottom: 2px solid #333; padding-bottom: 10px; margin-top:0;">Training Plans</h2>
 
     <div class="box-section">
-        <h3 style="margin-top:0;">Stwórz nowy plan</h3>
+        <h3 style="margin-top:0;">Create a new plan</h3>
         <form th:action="@{/plans/add}" th:object="${newPlan}" method="post" class="flex-form">
-            <input type="text" th:field="*{name}" placeholder="Nazwa planu (np. Push Pull Legs)" required>
-            <input type="text" th:field="*{description}" placeholder="Krótki opis" required>
-            <button type="submit" class="btn-black">DODAJ</button>
+            <input type="text" th:field="*{name}" placeholder="Plan name (e.g., Push Pull Legs)" required>
+            <input type="text" th:field="*{description}" placeholder="Short description" required>
+            <button type="submit" class="btn-black">ADD</button>
         </form>
     </div>
 
     <div class="box-section">
         <table class="table-data">
             <thead>
-            <tr><th>Nazwa</th><th>Opis</th><th>Status</th><th>Akcje</th></tr>
+            <tr><th>Name</th><th>Description</th><th>Status</th><th>Actions</th></tr>
             </thead>
             <tbody>
             <tr th:each="plan : ${plansList}">
@@ -42,19 +42,19 @@
                 <td>
                     <form th:action="@{/plans/activate/{id}(id=${plan.id})}" method="post" style="margin: 0;">
                         <button type="submit" th:classappend="${user.currentPlanId == plan.id} ? 'btn-active' : ''" class="btn-black">
-                            <span th:text="${user.currentPlanId == plan.id} ? '★ AKTYWNY' : 'AKTYWUJ'"></span>
+                            <span th:text="${user.currentPlanId == plan.id} ? '★ ACTIVE' : 'ACTIVATE'"></span>
                         </button>
                     </form>
                 </td>
                 <td style="display: flex; gap: 5px; flex-wrap: wrap;">
-                    <a th:href="@{/plans/{id}(id=${plan.id})}" class="btn-black">SZCZEGÓŁY</a>
-                    <a th:if="${#lists.contains(editablePlanIds, plan.id)}" th:href="@{/plans/edit/{id}(id=${plan.id})}" class="btn-black" style="background: #ffc107; color: black;">EDYTUJ</a>
+                    <a th:href="@{/plans/{id}(id=${plan.id})}" class="btn-black">DETAILS</a>
+                    <a th:if="${#lists.contains(editablePlanIds, plan.id)}" th:href="@{/plans/edit/{id}(id=${plan.id})}" class="btn-black" style="background: #ffc107; color: black;">EDIT</a>
                     <form th:action="@{/plans/clone/{id}(id=${plan.id})}" method="post" style="margin: 0;">
-                        <button type="submit" class="btn-black">KLONUJ</button>
+                        <button type="submit" class="btn-black">CLONE</button>
                     </form>
-                    <a th:if="${isCoachOrAdmin and #lists.contains(editablePlanIds, plan.id)}" th:href="@{/plans/{id}/share(id=${plan.id})}" class="btn-black">WIDOCZNOŚĆ</a>
+                    <a th:if="${isCoachOrAdmin and #lists.contains(editablePlanIds, plan.id)}" th:href="@{/plans/{id}/share(id=${plan.id})}" class="btn-black">VISIBILITY</a>
                     <form th:if="${#lists.contains(editablePlanIds, plan.id)}" th:action="@{/plans/delete/{id}(id=${plan.id})}" method="post" style="margin: 0;">
-                        <button type="submit" class="btn-black" style="background: #dc3545;">USUŃ</button>
+                        <button type="submit" class="btn-black" style="background: #dc3545;">DELETE</button>
                     </form>
                 </td>
             </tr>

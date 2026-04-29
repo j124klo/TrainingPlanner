@@ -2,7 +2,7 @@
 <html lang="pl" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Stoper & Interwały</title>
+    <title>Stopwatch & Intervals</title>
     <style th:replace="~{fragments :: common-css}"></style>
     <style>
         .box-section { background: #fff; border: 2px solid #333; padding: 40px; max-width: 600px; margin: 0 auto; text-align: center; }
@@ -48,15 +48,15 @@
 
             <div class="interval-settings" id="intSettings">
                 <div>
-                    <label>Rundy</label>
+                    <label>Rounds</label>
                     <input type="number" id="inpRounds" value="5" min="1">
                 </div>
                 <div>
-                    <label>Praca (sek)</label>
+                    <label>Work (sec)</label>
                     <input type="number" id="inpWork" value="40" min="1">
                 </div>
                 <div>
-                    <label>Odpoczynek (sek)</label>
+                    <label>Rest (sec)</label>
                     <input type="number" id="inpRest" value="20" min="1">
                 </div>
             </div>

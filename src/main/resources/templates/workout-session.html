@@ -22,7 +22,7 @@
     <h2 style="text-transform: uppercase; border-bottom: 2px solid #333; padding-bottom: 10px; margin-top:0;">Workout Session</h2>
 
     <div th:if="${#lists.isEmpty(sessionExercises)}" class="box-section">
-        <p>Nie masz dziś nic w planie, ale możesz dodać ćwiczenie ręcznie poniżej!</p>
+        <p>You don't have anything planned for today, but you can add an exercise manually below!</p>
     </div>
 
     <div th:each="exercise : ${sessionExercises}" class="box-section">
@@ -30,11 +30,11 @@
 
         <table th:if="${logsByExercise.containsKey(exercise.id)}" class="log-table">
             <tr>
-                <th>Seria</th>
-                <th th:if="${exercise.valueTypes == 'Ciężar + Powtórzenia'}">Ciężar (kg)</th>
-                <th th:if="${exercise.valueTypes == 'Dystans + Czas'}">Dystans (km)</th>
-                <th th:if="${exercise.valueTypes == 'Dystans + Czas' or exercise.valueTypes == 'Czas + Powtórzenia' or exercise.valueTypes == 'Tylko Czas'}">Czas (min)</th>
-                <th th:if="${exercise.valueTypes == 'Ciężar + Powtórzenia' or exercise.valueTypes == 'Tylko Powtórzenia' or exercise.valueTypes == 'Czas + Powtórzenia'}">Powtórzenia</th>
+                <th>Set</th>
+                <th th:if="${exercise.valueTypes == 'Ciężar + Powtórzenia'}">Weight (kg)</th>
+                <th th:if="${exercise.valueTypes == 'Dystans + Czas'}">Distance (km)</th>
+                <th th:if="${exercise.valueTypes == 'Dystans + Czas' or exercise.valueTypes == 'Czas + Powtórzenia' or exercise.valueTypes == 'Tylko Czas'}">Time (min)</th>
+                <th th:if="${exercise.valueTypes == 'Ciężar + Powtórzenia' or exercise.valueTypes == 'Tylko Powtórzenia' or exercise.valueTypes == 'Czas + Powtórzenia'}">Reps</th>
                 <th>✔</th>
             </tr>
             <tr th:each="log : ${logsByExercise.get(exercise.id)}">
@@ -50,65 +50,65 @@
         <form th:action="@{/workout/log}" method="post" class="flex-row">
             <input type="hidden" name="exerciseId" th:value="${exercise.id}">
             <div class="input-group" style="max-width: 80px;">
-                <label>Seria</label>
+                <label>Set</label>
                 <input type="number" name="setNumber" th:value="${logsByExercise.containsKey(exercise.id) ? logsByExercise.get(exercise.id).size() + 1 : 1}" required>
             </div>
 
             <div class="input-group" th:if="${exercise.valueTypes == 'Ciężar + Powtórzenia'}">
-                <label>Ciężar (kg)</label>
+                <label>Weight (kg)</label>
                 <input type="number" step="0.5" name="weight" required>
             </div>
             <div class="input-group" th:if="${exercise.valueTypes == 'Dystans + Czas'}">
-                <label>Dystans (km)</label>
+                <label>Distance (km)</label>
                 <input type="number" step="0.1" name="distance" required>
             </div>
             <div class="input-group" th:if="${exercise.valueTypes == 'Dystans + Czas' or exercise.valueTypes == 'Czas + Powtórzenia' or exercise.valueTypes == 'Tylko Czas'}">
-                <label>Czas (min)</label>
+                <label>Time (min)</label>
                 <input type="number" name="timeMinutes" required>
             </div>
             <div class="input-group" th:if="${exercise.valueTypes == 'Ciężar + Powtórzenia' or exercise.valueTypes == 'Tylko Powtórzenia' or exercise.valueTypes == 'Czas + Powtórzenia'}">
-                <label>Powtórzenia</label>
+                <label>Reps</label>
                 <input type="number" name="reps" required>
             </div>
 
-            <button type="submit" class="btn-log">ZAPISZ</button>
+            <button type="submit" class="btn-log">SAVE</button>
         </form>
     </div>
 
     <div class="box-section" style="background: #f9f9f9; border-style: dashed;">
-        <h3 style="margin-top:0;">➕ Zrób coś ekstra (spoza planu)</h3>
+        <h3 style="margin-top:0;">Do something extra (off-plan)</h3>
         <form th:action="@{/workout/log}" method="post" class="flex-row">
             <div class="input-group" style="flex: 2;">
-                <label>Wybierz ćwiczenie</label>
+                <label>Select exercise</label>
                 <select name="exerciseId" id="extraSelect" onchange="updateExtraFields()" required>
-                    <option value="" disabled selected data-type="">-- Wybierz z katalogu --</option>
+                    <option value="" disabled selected data-type="">-- Select from catalog --</option>
                     <option th:each="ex : ${allExercises}" th:value="${ex.id}" th:text="${ex.name}" th:data-type="${ex.valueTypes}"></option>
                 </select>
             </div>
             <input type="hidden" name="setNumber" value="1">
 
             <div class="input-group" id="fWeight" style="display:none;">
-                <label>Ciężar (kg)</label>
+                <label>Weight (kg)</label>
                 <input type="number" step="0.5" name="weight" id="iWeight">
             </div>
             <div class="input-group" id="fDist" style="display:none;">
-                <label>Dystans (km)</label>
+                <label>Distance (km)</label>
                 <input type="number" step="0.1" name="distance" id="iDist">
             </div>
             <div class="input-group" id="fTime" style="display:none;">
-                <label>Czas (min)</label>
+                <label>Time (min)</label>
                 <input type="number" name="timeMinutes" id="iTime">
             </div>
             <div class="input-group" id="fReps" style="display:none;">
-                <label>Powtórzenia</label>
+                <label>Reps</label>
                 <input type="number" name="reps" id="iReps">
             </div>
 
-            <button type="submit" class="btn-log">DODAJ</button>
+            <button type="submit" class="btn-log">ADD</button>
         </form>
     </div>
 
-    <a th:href="@{/dashboard}" style="display: block; text-align: center; margin-top: 20px; color: #333; font-weight: bold; text-decoration: none; padding: 10px; border: 2px solid #333; background: #e0e0e0;">ZAKOŃCZ TRENING</a>
+    <a th:href="@{/dashboard}" style="display: block; text-align: center; margin-top: 20px; color: #333; font-weight: bold; text-decoration: none; padding: 10px; border: 2px solid #333; background: #e0e0e0;">FINISH WORKOUT</a>
 </div>
 
 <script>

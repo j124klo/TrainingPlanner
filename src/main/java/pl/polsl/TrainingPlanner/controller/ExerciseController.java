@@ -137,7 +137,7 @@ public class ExerciseController {
         // Można sklonować tylko to, co się widzi
         if (accessService.canViewExercise(original, currentUser)) {
             Exercise clone = new Exercise();
-            clone.setName(original.getName() + " (Kopia)");
+            clone.setName(original.getName() + " (Copy)");
             clone.setDescription(original.getDescription());
             clone.setValueTypes(original.getValueTypes());
             clone.setOwner(currentUser); // Ty stajesz się właścicielem kopii!

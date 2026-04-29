@@ -2,7 +2,7 @@
 <html lang="pl" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Moi Podopieczni</title>
+    <title>My Clients</title>
     <style th:replace="~{fragments :: common-css}"></style>
     <style>
         .box-section { background: #fff; border: 2px solid #333; padding: 20px; margin-bottom: 25px; }
@@ -18,46 +18,47 @@
 <body>
 <div th:replace="~{fragments :: sidebar}"></div>
 <div class="main-content">
-    <h2 style="text-transform: uppercase; border-bottom: 2px solid #333; padding-bottom: 10px; margin-top:0;">Moi Podopieczni</h2>
+    <h2 style="text-transform: uppercase; border-bottom: 2px solid #333; padding-bottom: 10px; margin-top:0;">My Clients</h2>
 
     <div class="box-section">
-        <h3>Zaproś nowego klienta</h3>
-        <p style="color:red;" th:if="${param.error}">Nie znaleziono użytkownika o takim loginie!</p>
-        <p style="color:green;" th:if="${param.success}">Wysłano zaproszenie!</p>
+        <h3>Invite a new client</h3>
+        <p style="color:red;" th:if="${#strings.equals(param.error, 'notfound')}">User with this login not found!</p>
+        <p style="color:red;" th:if="${#strings.equals(param.error, 'alreadyexists')}">This user is already your client or an invitation is pending!</p>
+        <p style="color:green;" th:if="${param.success}">Invitation sent!</p>
 
         <form th:action="@{/coach/invite}" method="post" class="flex-row">
             <div class="input-group">
-                <label>Login użytkownika:</label>
-                <input type="text" name="login" placeholder="Wpisz dokładny login..." required>
+                <label>User login:</label>
+                <input type="text" name="login" placeholder="Enter exact login..." required>
             </div>
-            <button type="submit" class="btn-black">WYŚLIJ ZAPROSZENIE</button>
+            <button type="submit" class="btn-black">SEND INVITATION</button>
         </form>
     </div>
 
     <div class="box-section">
-        <h3>Lista Klientów</h3>
+        <h3>Client List</h3>
         <table class="table-data">
             <tr>
                 <th>Login</th>
                 <th>Status</th>
-                <th>Akcje</th>
+                <th>Actions</th>
             </tr>
             <tr th:each="rel : ${relations}">
                 <td th:text="${rel.client.login}"></td>
                 <td>
-                    <span th:if="${rel.status == 'PENDING'}" style="color:orange;">Oczekuje</span>
-                    <span th:if="${rel.status == 'ACCEPTED'}" style="color:green; font-weight:bold;">Aktywny</span>
+                    <span th:if="${rel.status == 'PENDING'}" style="color:orange;">Pending</span>
+                    <span th:if="${rel.status == 'ACCEPTED'}" style="color:green; font-weight:bold;">Active</span>
                 </td>
                 <td>
-                    <a th:if="${rel.status == 'ACCEPTED'}" th:href="@{/coach/clients/{id}/workouts(id=${rel.client.id})}" class="btn-black" style="padding: 5px 10px; text-decoration: none; display: inline-block;">Podgląd Treningów</a>
+                    <a th:if="${rel.status == 'ACCEPTED'}" th:href="@{/coach/clients/{id}/workouts(id=${rel.client.id})}" class="btn-black" style="padding: 5px 10px; text-decoration: none; display: inline-block;">View Workouts</a>
                     <form th:if="${rel.status == 'ACCEPTED'}" th:action="@{/coach/clients/{id}/assign-plan(id=${rel.client.id})}" method="post" style="display:inline-block; margin-left: 5px;">
                         <select name="planId" required style="padding: 5px; border: 1px solid #aaa;">
-                            <option value="" disabled selected>Wybierz plan...</option>
+                            <option value="" disabled selected>Select plan...</option>
                             <option th:each="plan : ${coachPlans}" th:value="${plan.id}" th:text="${plan.name}"></option>
                         </select>
-                        <button type="submit" class="btn-black" style="padding: 5px 10px; height:auto;">Przypisz klientowi</button>
+                        <button type="submit" class="btn-black" style="padding: 5px 10px; height:auto;">Assign to client</button>
                     </form>
-                    <a th:if="${rel.status == 'ACCEPTED'}" th:href="@{/coach/clients/{id}/reports(id=${rel.client.id})}" class="btn-black" style="padding: 5px 10px; text-decoration: none; display: inline-block; background: #007bff;">Raport i Wykres</a>
+                    <a th:if="${rel.status == 'ACCEPTED'}" th:href="@{/coach/clients/{id}/reports(id=${rel.client.id})}" class="btn-black" style="padding: 5px 10px; text-decoration: none; display: inline-block; background: #007bff;">Report & Chart</a>
                 </td>
             </tr>
         </table>

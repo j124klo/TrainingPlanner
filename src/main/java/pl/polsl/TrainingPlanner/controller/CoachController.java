@@ -65,9 +65,19 @@ public class CoachController {
             return "redirect:/coach/clients?error=notfound";
         }
 
+        User targetClient = clientOpt.get();
+
+        // NOWE ZABEZPIECZENIE: Sprawdzenie czy zaproszenie już istnieje (oczekujące lub zaakceptowane)
+        boolean alreadyInvited = relationRepository.findByCoachId(userId).stream()
+                .anyMatch(r -> r.getClient().getId().equals(targetClient.getId()));
+
+        if (alreadyInvited) {
+            return "redirect:/coach/clients?error=alreadyexists";
+        }
+
         CoachClientRelation relation = new CoachClientRelation();
         relation.setCoach(coach);
-        relation.setClient(clientOpt.get());
+        relation.setClient(targetClient);
         relation.setStatus("PENDING");
         relationRepository.save(relation);
 
@@ -107,7 +117,7 @@ public class CoachController {
 
         // Klonujemy plan
         TrainingPlan clone = new TrainingPlan();
-        clone.setName(originalPlan.getName() + " (Od Trenera)");
+        clone.setName(originalPlan.getName() + " (From Coach)");
         clone.setDescription(originalPlan.getDescription());
         clone.setUser(client);
         clone.setPublic(false);

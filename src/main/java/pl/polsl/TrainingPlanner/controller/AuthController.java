@@ -37,7 +37,7 @@ public class AuthController {
 
         // 1. Sprawdzenie, czy login jest wolny
         if (userRepository.findByLogin(newUser.getLogin()).isPresent()) {
-            model.addAttribute("error", "Taki login jest już zajęty!");
+            model.addAttribute("error", "Login is already taken!");
             return "register";
         }
 
@@ -49,7 +49,7 @@ public class AuthController {
             if ("trener123".equals(coachPassword)) {
                 newUser.setRole(Role.COACH);
             } else {
-                model.addAttribute("error", "Błędne hasło weryfikacyjne dla trenera!");
+                model.addAttribute("error", "Invalid coach verification password!");
                 return "register";
             }
         } else {
@@ -78,7 +78,7 @@ public class AuthController {
             session.setAttribute("userId", user.get().getId());
             return "redirect:/dashboard"; // Przejście do głównego panelu
         } else {
-            model.addAttribute("error", "Nieprawidłowy login lub hasło!");
+            model.addAttribute("error", "Invalid login or password!");
             return "login";
         }
     }

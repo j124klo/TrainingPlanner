@@ -2,7 +2,7 @@
 <html lang="pl" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Udostępnij Plan</title>
+    <title>Share Plan</title>
     <style th:replace="~{fragments :: common-css}"></style>
     <style>
         .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
@@ -18,7 +18,7 @@
 
 <div class="main-content">
     <div class="container">
-        <h2>Udostępnianie planu: <span th:text="${plan.name}"></span></h2>
+        <h2>Sharing a plan: <span th:text="${plan.name}"></span></h2>
 
         <div th:if="${warning}" class="warning-box">
             <p th:text="${warning}"></p>
@@ -26,21 +26,21 @@
 
         <form th:action="@{/plans/{id}/share(id=${plan.id})}" method="post">
 
-            <label>Status widoczności:</label>
+            <label>Visibility status:</label>
             <select name="isPublic">
-                <option value="false" th:selected="${!plan.isPublic}">🔒 Prywatny (Tylko ja)</option>
-                <option value="true" th:selected="${plan.isPublic}">🌍 Publiczny (Wszyscy)</option>
+                <option value="false" th:selected="${!plan.isPublic}">Private (Only me)</option>
+                <option value="true" th:selected="${plan.isPublic}">Public (Everyone)</option>
             </select>
 
             <div th:if="${warning}" style="margin-top: 20px; border: 1px solid red; padding: 10px; border-radius: 4px;">
                 <input type="checkbox" id="forceShare" name="forceShareExercises" value="true" required>
-                <label for="forceShare" style="display: inline; color: red;">Zgadzam się na zmianę widoczności powiązanych ćwiczeń na Publiczne</label>
+                <label for="forceShare" style="display: inline; color: red;">I agree to change the visibility of related exercises to Public</label>
             </div>
 
-            <button type="submit" class="btn-save">Zapisz ustawienia</button>
+            <button type="submit" class="btn-save">Save settings</button>
         </form>
 
-        <a th:href="@{/plans}" style="display: block; text-align: center; margin-top: 15px; color: #6c757d;">Anuluj i wróć</a>
+        <a th:href="@{/plans}" style="display: block; text-align: center; margin-top: 15px; color: #6c757d;">Cancel and return</a>
     </div>
 </div>
 

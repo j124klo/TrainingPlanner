@@ -56,14 +56,14 @@
 
 <div th:fragment="sidebar" class="sidebar">
     <div style="background: #ccc; padding: 10px; margin-bottom: 20px; text-align: center; border: 2px solid #333;">
-        <small style="text-transform: uppercase;">Zalogowano jako:</small><br>
+        <small style="text-transform: uppercase;">Logged in as:</small><br>
         <strong th:if="${user != null}" th:text="${user.login}" style="font-size: 1.2em; color: #007bff;"></strong>
         <span th:if="${user != null}" th:text="'(' + ${user.role} + ')'" style="display:block; font-size: 0.8em; color: #555;"></span>
-        <strong th:if="${user == null}" style="font-size: 1.2em; color: #dc3545;">GOŚĆ</strong>
+        <strong th:if="${user == null}" style="font-size: 1.2em; color: #dc3545;">GUEST</strong>
     </div>
 
     <a th:if="${user != null}" th:href="@{/dashboard}" class="nav-btn">HOME</a>
-    <a th:if="${user != null}" th:href="@{/plans}" class="nav-btn">PLAN</a>
+    <a th:if="${user != null}" th:href="@{/plans}" class="nav-btn">TRAINING PLANS</a>
     <a th:if="${user != null}" th:href="@{/workout/start}" class="nav-btn">START WORKOUT</a>
 
     <a th:href="@{/calculator}" class="nav-btn">1RM CALCULATOR</a>
@@ -79,7 +79,7 @@
 
     <div class="spacer"></div>
     <a th:if="${user != null}" th:href="@{/logout}" class="nav-btn">LOGOUT</a>
-    <a th:if="${user == null}" th:href="@{/login}" class="nav-btn" style="background: #28a745; color: white;">ZALOGUJ SIĘ</a>
+    <a th:if="${user == null}" th:href="@{/login}" class="nav-btn" style="background: #28a745; color: white;">LOGIN</a>
 </div>
 
 </body>

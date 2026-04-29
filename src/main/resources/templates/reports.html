@@ -2,7 +2,7 @@
 <html lang="pl" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Raporty i Analityka</title>
+    <title>Reports & Analytics</title>
     <style th:replace="~{fragments :: common-css}"></style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -16,31 +16,43 @@
 <div th:replace="~{fragments :: sidebar}"></div>
 <div class="main-content">
     <h2 style="text-transform: uppercase; border-bottom: 2px solid #333; padding-bottom: 10px; margin-top:0;">
-        Raporty <span th:if="${client != null}" th:text="'Klienta: ' + ${client.login}" style="color:#007bff;"></span>
+        Reports <span th:if="${client != null}" th:text="'for Client: ' + ${client.login}" style="color:#007bff;"></span>
     </h2>
+
+    <div class="box-section" style="background: #f0f0f0; display: flex; gap: 15px; align-items: center; border-style: dashed;">
+        <strong style="text-transform: uppercase;">Select client:</strong>
+        <select onchange="location.href='/coach/clients/' + this.value + '/reports'" style="padding: 10px; border: 2px solid #333; font-weight: bold; background: white; cursor: pointer;">
+            <option th:each="c : ${myClients}"
+                    th:value="${c.id}"
+                    th:text="${c.login}"
+                    th:selected="${c.id == client.id}">
+            </option>
+        </select>
+    </div>
+
     <form method="get" class="box-section" style="display: flex; gap: 15px; align-items: center; background: #e9ecef;">
-        <strong style="text-transform: uppercase;">Parametry raportu:</strong>
-        <label>Od:</label>
+        <strong style="text-transform: uppercase;">Report Parameters:</strong>
+        <label>From:</label>
         <input type="date" name="startDate" th:value="${startDate}" style="padding: 8px; border: 1px solid #aaa;">
 
-        <label>Do:</label>
+        <label>To:</label>
         <input type="date" name="endDate" th:value="${endDate}" style="padding: 8px; border: 1px solid #aaa;">
 
-        <button type="submit" style="background: #333; color: white; border: none; padding: 10px 15px; font-weight: bold; cursor: pointer;">GENERUJ RAPORT</button>
-        <a th:href="@{/coach/clients/{id}/reports(id=${client.id})}" style="color: #dc3545; text-decoration: none; font-weight: bold; margin-left: 10px;">Wyczyść filtry</a>
+        <button type="submit" style="background: #333; color: white; border: none; padding: 10px 15px; font-weight: bold; cursor: pointer;">GENERATE REPORT</button>
+        <a th:href="@{/coach/clients/{id}/reports(id=${client.id})}" style="color: #dc3545; text-decoration: none; font-weight: bold; margin-left: 10px;">Clear filters</a>
     </form>
 
     <div class="box-section">
-        <h3 style="margin-top:0; text-transform: uppercase;">Trend Objętości Treningowej (Suma kg na sesję)</h3>
+        <h3 style="margin-top:0; text-transform: uppercase;">Training Volume Trend (Total kg per session)</h3>
         <canvas id="volumeChart" width="400" height="120"></canvas>
     </div>
 
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div class="box-section">
-            <h3 style="margin-top:0;">1. Raport Objętości Treningowej</h3>
-            <p style="font-size: 0.85em; color: #555;">Suma podniesionego ciężaru (ciężar x powtórzenia) oraz łączna liczba serii.</p>
+            <h3 style="margin-top:0;">1. Training Volume Report</h3>
+            <p style="font-size: 0.85em; color: #555;">Total volume (weight x reps) and total number of sets.</p>
             <table class="table-data">
-                <tr><th>Ćwiczenie</th><th>Suma (kg)</th><th>Suma Serii</th></tr>
+                <tr><th>Exercise</th><th>Total (kg)</th><th>Total Sets</th></tr>
                 <tr th:each="row : ${volumeReport}" th:if="${row.totalVolume > 0}">
                     <td style="font-weight: bold;" th:text="${row.exerciseName}"></td>
                     <td th:text="${row.totalVolume} + ' kg'"></td>
@@ -50,14 +62,15 @@
         </div>
 
         <div class="box-section">
-            <h3 style="margin-top:0;">2. Raport Aktywności Treningowej</h3>
-            <p style="font-size: 0.85em; color: #555;">Częstotliwość sesji. Łączna liczba dni oraz średnia liczba ćwiczeń na dzień.</p>
+            <h3 style="margin-top:0;">2. Training Activity Report</h3>
+            <p style="font-size: 0.85em; color: #555;">Session frequency. Total number of days and average number of exercises per day.</p>
             <div style="background: #e9ecef; padding: 15px; border: 1px solid #aaa; margin-bottom: 15px; display: flex; justify-content: space-around; font-size: 1.2em;">
-                <div>Dni treningowe: <strong th:text="${totalTrainingDays}"></strong></div>
-                <div>Śr. ćwiczeń/dzień: <strong th:text="${avgExercisesPerDay}"></strong></div>
+                <div>Training days: <strong th:text="${totalTrainingDays}"></strong></div>
+                <div>Avg. exercises/day<span style="color: red; font-weight: bold;">(tr.)</span>: <strong th:text="${avgExercisesPerDay}"></strong></div>
+                <div style="color: #007bff;">Avg. exercises/day: <strong th:text="${avgExercisesPerRangeDay}"></strong></div>
             </div>
             <table class="table-data">
-                <tr><th>Data treningu</th><th>Ilość wykonanych ćwiczeń</th></tr>
+                <tr><th>Workout date</th><th>Number of exercises performed</th></tr>
                 <tr th:each="entry : ${exercisesPerDay}">
                     <td th:text="${entry.key}"></td>
                     <td th:text="${entry.value}"></td>
@@ -77,7 +90,7 @@
         data: {
             labels: labels,
             datasets: [{
-                label: 'Całkowity podniesiony ciężar (kg)',
+                label: 'Total weight lifted (kg)',
                 data: data,
                 borderColor: '#333',
                 backgroundColor: 'rgba(51, 51, 51, 0.1)',

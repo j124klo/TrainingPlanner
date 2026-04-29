@@ -85,7 +85,7 @@ public class TrainingPlanController {
         model.addAttribute("allExercises", visibleExercises);
         model.addAttribute("canEdit", accessService.canEditPlan(plan, currentUser));
 
-        String[] dayNames = {"", "Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"};
+        String[] dayNames = {"", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
         model.addAttribute("dayNames", dayNames);
 
         return "plan-details";
@@ -155,7 +155,7 @@ public class TrainingPlanController {
         TrainingPlan original = planRepository.findById(id).orElseThrow();
 
         TrainingPlan clone = new TrainingPlan();
-        clone.setName(original.getName() + " (Kopia)");
+        clone.setName(original.getName() + " (Copy)");
         clone.setDescription(original.getDescription());
         clone.setUser(currentUser);
         clone.setPublic(false);;
@@ -214,7 +214,7 @@ public class TrainingPlanController {
         if (hasHiddenExercises && !forceShareExercises) {
             model.addAttribute("plan", plan);
             model.addAttribute("isPublic", isPublic);
-            model.addAttribute("warning", "Uwaga! Plan zawiera prywatne ćwiczenia. Zaznacz poniższe pole, by upublicznić je razem z planem.");
+            model.addAttribute("warning", "Warning! This plan contains private exercises. Select the field below to make them public along with the plan.");
             return "share-plan";
         }
 

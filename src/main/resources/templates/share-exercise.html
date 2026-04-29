@@ -2,7 +2,7 @@
 <html lang="pl" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Udostępnij Ćwiczenie</title>
+    <title>Share Exercise</title>
     <style th:replace="~{fragments :: common-css}"></style>
     <style>
         .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
@@ -17,20 +17,20 @@
 
 <div class="main-content">
     <div class="container">
-        <h2>Udostępnianie ćwiczenia: <span th:text="${exercise.name}"></span></h2>
+        <h2>Sharing an exercise: <span th:text="${exercise.name}"></span></h2>
 
         <form th:action="@{/exercises/{id}/share(id=${exercise.id})}" method="post">
 
-            <label>Status widoczności:</label>
+            <label>Visibility status:</label>
             <select name="isPublic">
-                <option value="false" th:selected="${!exercise.isPublic}">🔒 Prywatne (Tylko ja)</option>
-                <option value="true" th:selected="${exercise.isPublic}">🌍 Publiczne (Wszyscy)</option>
+                <option value="false" th:selected="${!exercise.isPublic}">Private (Only me)</option>
+                <option value="true" th:selected="${exercise.isPublic}">Public (Everyone)</option>
             </select>
 
-            <button type="submit" class="btn-save">Zapisz ustawienia</button>
+            <button type="submit" class="btn-save">Save settings</button>
         </form>
 
-        <a th:href="@{/exercises}" style="display: block; text-align: center; margin-top: 15px; color: #6c757d;">Anuluj i wróć</a>
+        <a th:href="@{/exercises}" style="display: block; text-align: center; margin-top: 15px; color: #6c757d;">Cancel and return</a>
     </div>
 </div>
 
