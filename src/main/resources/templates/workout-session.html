@@ -31,18 +31,18 @@
         <table th:if="${logsByExercise.containsKey(exercise.id)}" class="log-table">
             <tr>
                 <th>Set</th>
-                <th th:if="${exercise.valueTypes == 'Ciężar + Powtórzenia'}">Weight (kg)</th>
-                <th th:if="${exercise.valueTypes == 'Dystans + Czas'}">Distance (km)</th>
-                <th th:if="${exercise.valueTypes == 'Dystans + Czas' or exercise.valueTypes == 'Czas + Powtórzenia' or exercise.valueTypes == 'Tylko Czas'}">Time (min)</th>
-                <th th:if="${exercise.valueTypes == 'Ciężar + Powtórzenia' or exercise.valueTypes == 'Tylko Powtórzenia' or exercise.valueTypes == 'Czas + Powtórzenia'}">Reps</th>
+                <th th:if="${exercise.valueTypes == 'Weight + Reps'}">Weight (kg)</th>
+                <th th:if="${exercise.valueTypes == 'Distance + Time'}">Distance (km)</th>
+                <th th:if="${exercise.valueTypes == 'Distance + Time' or exercise.valueTypes == 'Time + Reps' or exercise.valueTypes == 'Time Only'}">Time (min)</th>
+                <th th:if="${exercise.valueTypes == 'Weight + Reps' or exercise.valueTypes == 'Reps Only' or exercise.valueTypes == 'Time + Reps'}">Reps</th>
                 <th>✔</th>
             </tr>
             <tr th:each="log : ${logsByExercise.get(exercise.id)}">
                 <td th:text="${log.setNumber}"></td>
-                <td th:if="${exercise.valueTypes == 'Ciężar + Powtórzenia'}" th:text="${log.weight}"></td>
-                <td th:if="${exercise.valueTypes == 'Dystans + Czas'}" th:text="${log.distance}"></td>
-                <td th:if="${exercise.valueTypes == 'Dystans + Czas' or exercise.valueTypes == 'Czas + Powtórzenia' or exercise.valueTypes == 'Tylko Czas'}" th:text="${log.timeMinutes}"></td>
-                <td th:if="${exercise.valueTypes == 'Ciężar + Powtórzenia' or exercise.valueTypes == 'Tylko Powtórzenia' or exercise.valueTypes == 'Czas + Powtórzenia'}" th:text="${log.reps}"></td>
+                <td th:if="${exercise.valueTypes == 'Weight + Reps'}" th:text="${log.weight}"></td>
+                <td th:if="${exercise.valueTypes == 'Distance + Time'}" th:text="${log.distance}"></td>
+                <td th:if="${exercise.valueTypes == 'Distance + Time' or exercise.valueTypes == 'Time + Reps' or exercise.valueTypes == 'Time Only'}" th:text="${log.timeMinutes}"></td>
+                <td th:if="${exercise.valueTypes == 'Weight + Reps' or exercise.valueTypes == 'Reps Only' or exercise.valueTypes == 'Time + Reps'}" th:text="${log.reps}"></td>
                 <td style="color: green; font-weight:bold;">OK</td>
             </tr>
         </table>
@@ -54,19 +54,19 @@
                 <input type="number" name="setNumber" th:value="${logsByExercise.containsKey(exercise.id) ? logsByExercise.get(exercise.id).size() + 1 : 1}" required>
             </div>
 
-            <div class="input-group" th:if="${exercise.valueTypes == 'Ciężar + Powtórzenia'}">
+            <div class="input-group" th:if="${exercise.valueTypes == 'Weight + Reps'}">
                 <label>Weight (kg)</label>
                 <input type="number" step="0.5" name="weight" required>
             </div>
-            <div class="input-group" th:if="${exercise.valueTypes == 'Dystans + Czas'}">
+            <div class="input-group" th:if="${exercise.valueTypes == 'Distance + Time'}">
                 <label>Distance (km)</label>
                 <input type="number" step="0.1" name="distance" required>
             </div>
-            <div class="input-group" th:if="${exercise.valueTypes == 'Dystans + Czas' or exercise.valueTypes == 'Czas + Powtórzenia' or exercise.valueTypes == 'Tylko Czas'}">
+            <div class="input-group" th:if="${exercise.valueTypes == 'Distance + Time' or exercise.valueTypes == 'Time + Reps' or exercise.valueTypes == 'Time Only'}">
                 <label>Time (min)</label>
                 <input type="number" name="timeMinutes" required>
             </div>
-            <div class="input-group" th:if="${exercise.valueTypes == 'Ciężar + Powtórzenia' or exercise.valueTypes == 'Tylko Powtórzenia' or exercise.valueTypes == 'Czas + Powtórzenia'}">
+            <div class="input-group" th:if="${exercise.valueTypes == 'Weight + Reps' or exercise.valueTypes == 'Reps Only' or exercise.valueTypes == 'Time + Reps'}">
                 <label>Reps</label>
                 <input type="number" name="reps" required>
             </div>
@@ -131,18 +131,18 @@
         if (!type) return;
 
         // Pokazujemy tylko te pola, których wymaga typ ćwiczenia i ustawiamy jako obowiązkowe
-        if (type === 'Ciężar + Powtórzenia') {
+        if (type === 'Weight + Reps') {
             fWeight.style.display = "block"; iWeight.required = true;
             fReps.style.display = "block"; iReps.required = true;
-        } else if (type === 'Tylko Powtórzenia') {
+        } else if (type === 'Reps Only') {
             fReps.style.display = "block"; iReps.required = true;
-        } else if (type === 'Czas + Powtórzenia') {
+        } else if (type === 'Time + Reps') {
             fTime.style.display = "block"; iTime.required = true;
             fReps.style.display = "block"; iReps.required = true;
-        } else if (type === 'Dystans + Czas') {
+        } else if (type === 'Distance + Time') {
             fDist.style.display = "block"; iDist.required = true;
             fTime.style.display = "block"; iTime.required = true;
-        } else if (type === 'Tylko Czas') {
+        } else if (type === 'Time Only') {
             fTime.style.display = "block"; iTime.required = true;
         }
     }

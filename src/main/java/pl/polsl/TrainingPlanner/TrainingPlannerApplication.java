@@ -8,6 +8,7 @@ import pl.polsl.TrainingPlanner.model.*;
 import pl.polsl.TrainingPlanner.repository.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @SpringBootApplication
 public class TrainingPlannerApplication {
@@ -20,10 +21,29 @@ public class TrainingPlannerApplication {
 	public CommandLineRunner initData(ExerciseRepository exRepo, UserRepository userRepo, WorkoutLogRepository logRepo, TrainingPlanRepository planRepo, CoachClientRelationRepository relRepo) {
 		return args -> {
 			if (exRepo.count() == 0) {
-				Exercise ex1 = new Exercise("Martwy Ciąg", "Sztanga", "Ciężar + Powtórzenia"); ex1.setPublic(true);
-				Exercise ex2 = new Exercise("Wyciskanie", "Ławka", "Ciężar + Powtórzenia"); ex2.setPublic(true);
-				Exercise ex3 = new Exercise("Bieganie", "Bieżnia", "Dystans + Czas"); ex3.setPublic(true);
-				exRepo.save(ex1); exRepo.save(ex2); exRepo.save(ex3);
+				Exercise squat = new Exercise("Squat", "Barbell back squat", "Weight + Reps");
+				Exercise bench = new Exercise("Bench Press", "Flat barbell bench press", "Weight + Reps");
+				Exercise deadlift = new Exercise("Deadlift", "Conventional barbell deadlift", "Weight + Reps");
+				Exercise ohp = new Exercise("Overhead Press", "Standing barbell press", "Weight + Reps");
+				Exercise row = new Exercise("Barbell Row", "Bent over barbell row", "Weight + Reps");
+				Exercise pullups = new Exercise("Pull-ups", "Wide grip bodyweight pull-ups", "Reps Only");
+				Exercise pushups = new Exercise("Push-ups", "Standard floor push-ups", "Reps Only");
+				Exercise run = new Exercise("Running", "Outdoor or treadmill running", "Distance + Time");
+				Exercise plank = new Exercise("Plank", "Core stability hold", "Time Only");
+				Exercise curls = new Exercise("Bicep Curls", "Dumbbell or barbell curls", "Weight + Reps");
+				Exercise legPress = new Exercise("Leg Press", "Machine leg press", "Weight + Reps");
+				Exercise lunges = new Exercise("Walking Lunges", "Dumbbell walking lunges", "Weight + Reps");
+				Exercise dips = new Exercise("Tricep Dips", "Parallel bar bodyweight dips", "Reps Only");
+				Exercise cycling = new Exercise("Cycling", "Stationary bike", "Distance + Time");
+				Exercise jumpRope = new Exercise("Jump Rope", "Cardio skipping rope", "Time Only");
+
+				squat.setPublic(true); bench.setPublic(true); deadlift.setPublic(true);
+				ohp.setPublic(true); row.setPublic(true); pullups.setPublic(true);
+				pushups.setPublic(true); run.setPublic(true); plank.setPublic(true); curls.setPublic(true);
+				legPress.setPublic(true); lunges.setPublic(true); dips.setPublic(true); cycling.setPublic(true);
+				jumpRope.setPublic(true);
+
+				exRepo.saveAll(List.of(squat, bench, deadlift, ohp, row, pullups, pushups, run, plank, curls, legPress, lunges, dips, cycling, jumpRope));
 
 				if (userRepo.count() == 0) {
 					// 1. Użytkownik (Klient)
@@ -45,8 +65,8 @@ public class TrainingPlannerApplication {
 
 					// 4. Plan dla trenera (żeby mógł go przypisać klientowi)
 					TrainingPlan coachPlan = new TrainingPlan();
-					coachPlan.setName("Plan Siłowy od Trenera");
-					coachPlan.setDescription("Zbuduj siłę w 4 tygodnie");
+					coachPlan.setName("Coach's Strength Plan");
+					coachPlan.setDescription("Build strength in 4 weeks");
 					coachPlan.setUser(coachUser);
 					coachPlan.setPublic(false);
 					planRepo.save(coachPlan);
@@ -59,13 +79,13 @@ public class TrainingPlannerApplication {
 						// Ćwiczenie 1: Martwy Ciąg (3 serie)
 						for(int set = 1; set <= 3; set++) {
 							WorkoutLog log1 = new WorkoutLog();
-							log1.setUser(testUser); log1.setExercise(ex1); log1.setDate(workoutDate);
+							log1.setUser(testUser); log1.setExercise(deadlift); log1.setDate(workoutDate);
 							log1.setSetNumber(set); log1.setReps(5); log1.setWeight(startingWeight + (30-i)); // Ciężar rośnie!
 							logRepo.save(log1);
 						}
 						// Ćwiczenie 2: Bieganie (1 seria)
 						WorkoutLog log2 = new WorkoutLog();
-						log2.setUser(testUser); log2.setExercise(ex3); log2.setDate(workoutDate);
+						log2.setUser(testUser); log2.setExercise(run); log2.setDate(workoutDate);
 						log2.setSetNumber(1); log2.setDistance(5.0f); log2.setTimeMinutes(30);
 						logRepo.save(log2);
 					}

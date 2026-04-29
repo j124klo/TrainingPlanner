@@ -20,10 +20,17 @@
     <p class="error" th:if="${error}" th:text="${error}"></p>
 
     <form th:action="@{/register}" th:object="${newUser}" method="post">
-        <input type="text" th:field="*{login}" placeholder="Login" required>
+        <input type="text" th:field="*{login}" placeholder="Login" required
+               pattern="^[a-zA-Z0-9_]{3,20}$"
+               title="Login must be 3-20 characters long and contain only letters, numbers, or underscores.">
+
+        <div style="font-size: 11px; color: #777; text-align: left; margin: -5px 0 10px 5%;">
+            * 3-20 characters (letters, numbers, underscores only).
+        </div>
+
         <input type="password" th:field="*{password}" placeholder="Password" required>
 
-        <div style="text-align: left; margin: 15px 0;">
+        <div style="text-align: left; margin: 15px 0; margin-left: 5%;">
             <input type="checkbox" id="coachCheckbox" name="isCoach" style="width: auto;" onchange="toggleCoachPassword()">
             <label for="coachCheckbox">I am registering as a Coach</label>
         </div>

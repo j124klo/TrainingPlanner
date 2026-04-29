@@ -35,13 +35,19 @@ public class AuthController {
                                @org.springframework.web.bind.annotation.RequestParam(required = false) String coachPassword,
                                Model model) {
 
-        // 1. Sprawdzenie, czy login jest wolny
+        // 1. Walidacja Regex (Backend) - czy login spełnia wymagania
+        if (newUser.getLogin() == null || !newUser.getLogin().matches("^[a-zA-Z0-9_]{3,20}$")) {
+            model.addAttribute("error", "Login contains invalid characters or is too short!");
+            return "register";
+        }
+
+        // 2. Sprawdzenie, czy login jest wolny
         if (userRepository.findByLogin(newUser.getLogin()).isPresent()) {
             model.addAttribute("error", "Login is already taken!");
             return "register";
         }
 
-        // 2. Przypisywanie Ról
+        // 3. Przypisywanie Ról
         if ("admin".equals(newUser.getLogin())) {
             newUser.setRole(Role.ADMIN); // Magiczny użytkownik admin
         } else if (isCoach) {
@@ -56,7 +62,7 @@ public class AuthController {
             newUser.setRole(Role.USER); // Zwykły użytkownik
         }
 
-        // 3. Zapis
+        // 4. Zapis
         userRepository.save(newUser);
         return "redirect:/login";
     }
